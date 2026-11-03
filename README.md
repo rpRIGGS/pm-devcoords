@@ -21,7 +21,7 @@ Aim at a world surface (a successful raycast hit is required to save), capture `
 
 Use the menu to create or select a group and collection. An optional subgroup can organize collections such as `Vineyard_01A / Row_01 / SideA`. You can also use flat collections. The menu lets you choose `vector3` or `vector4`, capture a named point, review saved points, undo, and finish/export a group.
 
-Captured points are written to `captures.json` in the resource directory. **Finish / Export group (.txt)** writes `exports/<group>.txt` within the resource. These files are created on the server, not downloaded to the client. Preserve them when updating the resource.
+Captured points are written to `captures.json` in the resource directory. **Finish / Export group (.txt)** writes `<group>.txt` within the resource. These files are created on the server, not downloaded to the client. Preserve them when updating the resource.
 
 ## Status
 
@@ -36,7 +36,7 @@ Original project: [yy-devcoords](https://github.com/LuckyyFishyy/yy-devcoords) b
 1. Run `/devcoords` and choose **New group / collection**: Group `V01A`, Subgroup `Row_01`, Collection `SideA`.
 2. Aim at each position and press **J**. Each capture immediately saves to `captures.json`; no separate save action is needed.
 3. Reopen the menu with `/devcoordsmenu`, create `V01A / Row_01 / SideB`, and capture Side B points with **J**.
-4. Continue with other rows as needed. Choose **Finish / Export group (.txt)** to write `exports/V01A.txt` and clear the selection **after a successful export**.
+4. Continue with other rows as needed. Choose **Finish / Export group (.txt)** to write `V01A.txt` and clear the selection **after a successful export**.
 5. Run `/devcoords` to close the tool. The JSON remains saved even if you do not export; text exports are snapshots and should be regenerated after later edits.
 
 The `.txt` file contains readable named Lua-style `vector3(...)` / `vector4(...)` coordinates, grouped by row and side, suitable for copying into chat. It is stored on the **server**, not automatically downloaded to your PC's client folder.
