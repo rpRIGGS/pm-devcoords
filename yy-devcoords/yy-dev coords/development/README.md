@@ -1,12 +1,23 @@
 # PM DevCoords development
 
-Standalone developer-only aim-point capture utility.
+Standalone PowerMoves developer utility. No QBX, inventory integration, or polygon creator.
 
-- No QBX or inventory dependencies.
-- ACE gate: `command.devcoords` from existing server.cfg permissions.
-- `/devcoords` toggles pointer; M opens ox_lib menu; J captures; K undoes.
-- Groups and collections are freely named (e.g. Vineyard_01A / Row_01_SideA, Production / Sample_Barrels).
-- vector4 is default; heading is the camera's horizontal aim heading, not ped heading.
-- Captures are saved immediately to `captures.json`; group export writes `exports/<group>.lua`.
-- Polygon creation remains outside scope.
-- Pending: in-server testing, save/export checks, UI refinements and individual point review.
+## Implemented in code
+
+- Server-side ACE authorization via `command.devcoords`.
+- `/devcoords` toggles aim pointer and automatically opens the ox_lib menu.
+- `/devcoordsmenu` reopens the menu; no M keybind (reserved for phone).
+- J captures the aimed world point; K undoes the last capture, while active.
+- `vector3` or `vector4` selection, default `vector4`; heading comes from camera aim direction, not ped position.
+- Freely named groups and collections, with an optional subgroup (for example `Vineyard_01A / Row_01 / SideA`).
+- Auto-numbered or individually named points; point review.
+- Immediate server-side persistence in `captures.json`.
+- Finalize/export selected group to `exports/<group>.lua`, with nested subgroup tables.
+
+## Verification
+
+Not yet run in a FiveM server. Validate pointer raycast, ACE access, ox_lib menu, saving, reloading, undo, and Lua exports before calling this release tested.
+
+## Original project
+
+Based on yy-devcoords by LuckyyFishyy. Preserve the original License.txt.
