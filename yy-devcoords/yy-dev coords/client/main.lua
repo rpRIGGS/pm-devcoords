@@ -9,7 +9,7 @@ local function aim()
     local x, z = math.rad(rot.x), math.rad(rot.z)
     local dir = vector3(-math.sin(z)*math.cos(x), math.cos(z)*math.cos(x), math.sin(x))
     local dest = origin + dir * (Config.MaxDistance or 80.0)
-    local ray = StartShapeTestRay(origin.x,origin.y,origin.z,dest.x,dest.y,dest.z,-1,PlayerPedId(),0)
+    local ray = StartExpensiveSynchronousShapeTestLosProbe(origin.x,origin.y,origin.z,dest.x,dest.y,dest.z,-1,PlayerPedId(),7)
     local _, hit, pos = GetShapeTestResult(ray)
     return hit == 1 and pos or dest, rot.z % 360.0
 end
@@ -50,7 +50,10 @@ local function menu()
         for _,c in ipairs(collections) do
             local group,collection=g,c
             opts[#opts+1]={title=group..' / '..collection,description=#groups[g][c]..' points',
-                onSelect=function() selectedGroup,selectedCollection=group,collection notify('Selected '..collection) end}
+                onSelect=function()
+                    selectedGroup, selectedCollection = group, collection
+                    notify('Selected '..collection)
+                end}
         end
     end
     if selectedGroup and selectedCollection then
