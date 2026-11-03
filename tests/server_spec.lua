@@ -30,6 +30,8 @@ commands.devcoords(2)
 assert(notices[#notices].args[1] == 'Administrator permission required.')
 emit(2, 'pm-devcoords:create', 'Blocked', 'Row')
 assert(not files['captures.json'])
+emit(2, 'pm-devcoords:request')
+assert(not files['captures.json'])
 emit(1, 'pm-devcoords:create', 'Vineyard_01A', 'Row_01/SideA')
 assert(files['captures.json'])
 local point = { format='vector4', coords={x=1.2345,y=-2,z=3,h=90} }
@@ -46,6 +48,11 @@ emit(1, 'pm-devcoords:undo', 'Vineyard_01A', 'Row_01/SideA')
 emit(1, 'pm-devcoords:export', 'Vineyard_01A')
 assert(not files['exports/Vineyard_01A.lua']:find('Point_02',1,true))
 local before = files['captures.json']
+-- Reject invalid coordinates and names without changing persistent data.
+emit(1, 'pm-devcoords:capture', 'Vineyard_01A', 'Row_01/SideA', {format='vector4',coords={x=0,y=0,z=0,h=math.huge}})
+emit(1, 'pm-devcoords:capture', 'Vineyard_01A', 'Row_01/SideA', {format='bogus',coords={x=0,y=0,z=0,h=0}})
+emit(1, 'pm-devcoords:capture', 'Vineyard_01A', 'Row_01/SideA', {format='vector4',coords={x=0,y=0,z=0}})
+assert(files['captures.json'] == before)
 failWrites = true
 emit(1, 'pm-devcoords:capture', 'Vineyard_01A', 'Row_01/SideA', point)
 assert(files['captures.json'] == before)
