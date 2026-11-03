@@ -114,8 +114,8 @@ RegisterNetEvent('pm-devcoords:toggle',function()
             if GetGameTimer() - lastDisplay >= 120 then
                 lastDisplay = GetGameTimer()
                 SendNUIMessage({action='update',
-                vec3=('vector3(%.3f, %.3f, %.3f)'):format(point.x,point.y,point.z),
-                vec4=('vector4(%.3f, %.3f, %.3f, %.2f)'):format(point.x,point.y,point.z,heading),
+                vector3=('vector3(%.3f, %.3f, %.3f)'):format(point.x,point.y,point.z),
+                vector4=('vector4(%.3f, %.3f, %.3f, %.2f)'):format(point.x,point.y,point.z,heading),
                 context=(selectedGroup or 'No group')..' / '..(selectedCollection or 'No collection')})
             end
             Wait(0)
