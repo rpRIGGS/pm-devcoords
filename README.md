@@ -2,7 +2,7 @@
 
 Standalone FiveM developer coordinate capture tool for PowerMoves RP, based on yy-devcoords by LuckyyFishyy.
 
-Aim at a world location, capture `vector3(...)` or `vector4(...)` coordinates, organize points by named groups and collections, and save/export them to Lua.
+Aim at a world surface (a successful raycast hit is required to save), capture `vector3(...)` or `vector4(...)` coordinates, organize points by named groups and collections, and save/export them to Lua.
 
 ## Install
 
@@ -25,7 +25,7 @@ Captured points are written to `captures.json` in the resource directory. **Expo
 
 ## Status
 
-Implemented and committed; **not yet tested in a running FiveM server**. The in-game test must confirm raycast placement, menu controls, ACE permission, persistence after restart, and Lua export creation.
+Automated GitHub Actions checks cover Lua syntax, mocked server and client behavior, and the NUI overlay. **Not yet tested in a running FiveM server**. The in-game test must confirm raycast placement, menu controls, ACE permission, persistence after restart, and Lua export creation.
 
 ## Credits
 
