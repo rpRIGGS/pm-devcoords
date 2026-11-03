@@ -86,10 +86,7 @@ RegisterNetEvent('pm-devcoords:toggle',function()
     SendNUIMessage({action=active and 'open' or 'close'})
     if not active then return end
     TriggerServerEvent('pm-devcoords:request')
-    CreateThread(function()
-        Wait(250)
-        if active then menu() end
-    end)
+    menu()
     CreateThread(function()
         while active do
             point,heading=aim()
@@ -111,7 +108,10 @@ RegisterNetEvent('pm-devcoords:toggle',function()
         end
     end)
 end)
-RegisterCommand('devcoordsmenu',menu,false)
+RegisterCommand('devcoordsmenu',function()
+    if active then TriggerServerEvent('pm-devcoords:request') end
+    menu()
+end,false)
 RegisterCommand('devcoords_capture',function() capture() end,false)
 RegisterCommand('devcoords_undo',function()
     if active and selectedGroup and selectedCollection then
