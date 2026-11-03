@@ -3,6 +3,7 @@ local format, point, heading = 'vector4', nil, 0.0
 local lastDisplay = 0
 local lastAim = 0
 local aimHit = false
+local pointerGeneration = 0
 local pendingMenu = false
 local menu
 local function notify(msg, kind) lib.notify({title='PM DevCoords',description=msg,type=kind or 'inform'}) end
@@ -41,9 +42,10 @@ menu = function()
                 {type='input',label='Subgroup (optional, e.g. Row_01)'},
                 {type='input',label='Collection (e.g. SideA)',required=true}})
             if not input then return end
-            selectedGroup=input[1]
-            selectedCollection=(input[2] and input[2] ~= '' and (input[2] .. '/') or '') .. input[3]
-            TriggerServerEvent('pm-devcoords:create',selectedGroup,selectedCollection)
+            local group = input[1]
+            local collection = (input[2] and input[2] ~= '' and (input[2] .. '/') or '') .. input[3]
+            TriggerServerEvent('pm-devcoords:create',group,collection)
+            selectedGroup, selectedCollection = group, collection
         end},
         {title='Format: '..format,onSelect=function()
             format=format=='vector4' and 'vector3' or 'vector4'
@@ -96,6 +98,8 @@ menu = function()
 end
 RegisterNetEvent('pm-devcoords:toggle',function()
     active=not active
+    pointerGeneration = pointerGeneration + 1
+    local generation = pointerGeneration
     SendNUIMessage({action=active and 'open' or 'close'})
     if not active then
         pendingMenu = false
@@ -106,7 +110,7 @@ RegisterNetEvent('pm-devcoords:toggle',function()
     pendingMenu = true
     TriggerServerEvent('pm-devcoords:request')
     CreateThread(function()
-        while active do
+        while active and generation == pointerGeneration do
             if not point or GetGameTimer() - lastAim >= 50 then
                 point,heading,aimHit=aim()
                 lastAim=GetGameTimer()
