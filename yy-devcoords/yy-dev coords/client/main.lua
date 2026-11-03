@@ -59,6 +59,18 @@ local function menu()
             local input=lib.inputDialog('Point name',{{type='input',label='Name',required=true}})
             if input then capture(input[1]) end
         end}
+        opts[#opts+1]={title='Review captured points',onSelect=function()
+            local list=groups[selectedGroup] and groups[selectedGroup][selectedCollection] or {}
+            local items={}
+            for index,entry in ipairs(list) do
+                local c=entry.coords
+                items[#items+1]={title=('%d. %s'):format(index,entry.name),
+                    description=('%s (%.3f, %.3f, %.3f%s)'):format(entry.format,c.x,c.y,c.z,entry.format=='vector4' and ((', %.2f'):format(c.h)) or '')}
+            end
+            if #items==0 then items[1]={title='No points captured'} end
+            lib.registerContext({id='pm_devcoords_review',title=selectedCollection,menu='pm_devcoords',options=items})
+            lib.showContext('pm_devcoords_review')
+        end}
         opts[#opts+1]={title='Undo last point',onSelect=function()
             TriggerServerEvent('pm-devcoords:undo',selectedGroup,selectedCollection)
         end}
