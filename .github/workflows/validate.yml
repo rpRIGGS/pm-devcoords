@@ -1,0 +1,19 @@
+name: PM DevCoords validation
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua
+        run: sudo apt-get update && sudo apt-get install -y lua5.4
+      - name: Check Lua syntax
+        run: |
+          find pm-devcoords -type f -name '*.lua' ! -path '*/exports/*' -print0 | xargs -0 -n1 luac -p
+      - name: Test server logic with FiveM mocks
+        run: lua5.4 tests/server_spec.lua
+      - name: Test HTML overlay
+        run: node tests/nui_spec.js
