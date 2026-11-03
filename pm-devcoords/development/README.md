@@ -18,7 +18,7 @@
 - Server stores groups as `groups[group][collection] = { points... }`; optional subgroups are represented by `Subgroup/Collection` keys and expanded into nested Lua tables during export.
 - Capture names default to server-assigned `Point_01`, `Point_02`, etc. Named points use supplied names.
 - `captures.json` is written after changes using `SaveResourceFile`; data is read on resource start and sent to authorized clients.
-- `exports/<group>.txt` is generated on the server. Both `vector3` and `vector4` use full constructor names.
+- `<group>.txt` is generated on the server. Both `vector3` and `vector4` use full constructor names.
 - No `M` key mapping. `J` and `K` mappings are registered but handlers only operate while the tool is active.
 - No QBX, ox_target, ox_inventory, PolyZone creation, citizen ID or license allowlists.
 
@@ -34,4 +34,4 @@ Derived from yy-devcoords by LuckyyFishyy; original license preserved.
 
 
 ### Completing a group
-Each capture automatically persists to `captures.json`. **Finish / Export group (.txt)** generates a readable coordinate snapshot in `exports/`; the client clears its current selection only after the server confirms a successful write. A failed export retains the selection. Re-export after making further changes.
+Each capture automatically persists to `captures.json`. **Finish / Export group (.txt)** generates a readable coordinate snapshot in the resource root folder; the client clears its current selection only after the server confirms a successful write. A failed export retains the selection. Re-export after making further changes.
