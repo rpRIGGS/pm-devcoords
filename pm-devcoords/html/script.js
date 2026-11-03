@@ -1,10 +1,10 @@
-const panel = document.getElementById('dc-panel');
+const panel = document.getElementById('pm-devcoords-panel');
 window.addEventListener('message', ({ data = {} }) => {
     if (data.action === 'open') panel.classList.remove('hidden');
     if (data.action === 'close') panel.classList.add('hidden');
     if (data.action === 'update') {
-        document.getElementById('dc-vec3').textContent = data.vec3;
-        document.getElementById('dc-vec4').textContent = data.vec4;
-        document.getElementById('dc-context').textContent = data.context || 'No collection selected';
+        document.getElementById('pm-devcoords-vector3').textContent = data.vector3;
+        document.getElementById('pm-devcoords-vector4').textContent = data.vector4;
+        document.getElementById('pm-devcoords-context').textContent = data.context || 'No collection selected';
     }
 });
