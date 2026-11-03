@@ -1,23 +1,30 @@
-# PM DevCoords development
+# PM DevCoords — development notes
 
-Standalone PowerMoves developer utility. No QBX, inventory integration, or polygon creator.
+## Scope implemented
 
-## Implemented in code
-
-- Server-side ACE authorization via `command.devcoords`.
-- `/devcoords` toggles aim pointer and automatically opens the ox_lib menu.
-- `/devcoordsmenu` reopens the menu; no M keybind (reserved for phone).
-- J captures the aimed world point; K undoes the last capture, while active.
-- `vector3` or `vector4` selection, default `vector4`; heading comes from camera aim direction, not ped position.
-- Freely named groups and collections, with an optional subgroup (for example `Vineyard_01A / Row_01 / SideA`).
-- Auto-numbered or individually named points; point review.
+- Standalone FiveM utility with ox_lib; no QBX dependency.
+- Aim-point capture using a synchronous camera raycast; no ped-position capture.
+- `vector3` and `vector4` Lua output; vector4 defaults to camera-facing heading.
+- User-defined groups, optional subgroups, collections and point names.
+- Ordered point capture, review, last-point undo and collection switching.
 - Immediate server-side persistence in `captures.json`.
-- Finalize/export selected group to `exports/<group>.lua`, with nested subgroup tables.
+- Export a named group to `exports/<group>.lua`, including nested subgroup tables.
+- ACE access using `IsPlayerAceAllowed(source, 'command.devcoords')`.
 
-## Verification
+## Controls
 
-Not yet run in a FiveM server. Validate pointer raycast, ACE access, ox_lib menu, saving, reloading, undo, and Lua exports before calling this release tested.
+- `/devcoords`: toggle pointer; menu opens automatically.
+- `/devcoordsmenu`: reopen ox_lib menu.
+- J: capture point while tool is active.
+- K: undo last point while tool is active.
+- No M keybind; it is reserved for the server phone.
 
-## Original project
+## Server setup
 
-Based on yy-devcoords by LuckyyFishyy. Preserve the original License.txt.
+Install the resource directory containing `fxmanifest.lua` as `pm-devcoords`, ensure `ox_lib` first, and ensure `pm-devcoords` afterward. The resource uses existing ACE command permissions. Administrators must have `command.devcoords` allowed (either directly or through their inherited administrator command ACE permissions). Do not add citizen ID or license allowlists.
+
+## Verification status
+
+Code changes are committed, but FiveM runtime testing has not been performed here. In-server validation is still required for raycast hit placement, camera heading, ACE access, menu interaction, resource restart persistence, and actual Lua file creation. These are runtime checks, not additional planned features.
+
+Original author: LuckyyFishyy (yy-devcoords). Preserve the upstream License.txt.
