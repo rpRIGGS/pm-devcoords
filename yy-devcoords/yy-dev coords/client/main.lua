@@ -1,5 +1,6 @@
 local active, groups, selectedGroup, selectedCollection = false, {}, nil, nil
 local format, point, heading = 'vector4', nil, 0.0
+local lastDisplay = 0
 local function notify(msg, kind) lib.notify({title='PM DevCoords',description=msg,type=kind or 'inform'}) end
 RegisterNetEvent('pm-devcoords:notify', notify)
 RegisterNetEvent('pm-devcoords:data', function(data) groups = data or {} end)
@@ -81,11 +82,14 @@ RegisterNetEvent('pm-devcoords:toggle',function()
                 local c,s=Config.MarkerColor,Config.MarkerScale
                 DrawMarker(28,point.x,point.y,point.z+0.05,0,0,0,0,0,0,s,s,s,c.r,c.g,c.b,c.a,false,false,2,false,nil,nil,false)
             end
-            SendNUIMessage({action='update',
+            if GetGameTimer() - lastDisplay >= 120 then
+                lastDisplay = GetGameTimer()
+                SendNUIMessage({action='update',
                 vec3=('vector3(%.3f, %.3f, %.3f)'):format(point.x,point.y,point.z),
                 vec4=('vector4(%.3f, %.3f, %.3f, %.2f)'):format(point.x,point.y,point.z,heading),
                 context=(selectedGroup or 'No group')..' / '..(selectedCollection or 'No collection')})
-            Wait(100)
+            end
+            Wait(0)
         end
     end)
 end)
