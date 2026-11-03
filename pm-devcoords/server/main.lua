@@ -83,7 +83,7 @@ local function exportGroup(name)
     end
     lines[#lines + 1] = '    },'
     lines[#lines + 1] = '}'
-    local filename = 'exports/' .. name:gsub('[^%w_%-]', '_') .. '.txt'
+    local filename = '' .. name:gsub('[^%w_%-]', '_') .. '.txt'
     return SaveResourceFile(resource, filename, table.concat(lines, '\n') .. '\n', -1), filename
 end
 
