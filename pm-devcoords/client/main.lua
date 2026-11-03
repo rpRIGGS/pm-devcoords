@@ -19,14 +19,13 @@ local function aim()
     local dest = origin + dir * (Config.MaxDistance or 80.0)
     local ray = StartExpensiveSynchronousShapeTestLosProbe(origin.x,origin.y,origin.z,dest.x,dest.y,dest.z,-1,PlayerPedId(),7)
     local _, hit, pos = GetShapeTestResult(ray)
-    return hit == 1 and pos or dest, rot.z % 360.0
+    return hit == 1 and pos or dest, (-rot.z) % 360.0
 end
 local function capture(name)
     if not active or not point then return end
     if not selectedGroup or not selectedCollection then return notify('Choose a collection with /devcoordsmenu.','error') end
-    local list = groups[selectedGroup] and groups[selectedGroup][selectedCollection] or {}
     TriggerServerEvent('pm-devcoords:capture',selectedGroup,selectedCollection,{
-        name=name or ('Point_%02d'):format(#list+1),format=format,
+        name=name,format=format,
         coords={x=point.x,y=point.y,z=point.z,h=heading}
     })
 end
