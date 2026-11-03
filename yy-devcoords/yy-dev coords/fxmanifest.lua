@@ -1,34 +1,11 @@
--- By using this script, you agree to the EULA provided by LuckyyFishyy
-
 fx_version 'cerulean'
 game 'gta5'
-
-author 'LuckyyFishyy'
-description 'Developer coords utility for QBXCore'
-version '1.0.0'
-
+author 'LuckyyFishyy / PowerMoves RP'
+description 'PowerMoves RP developer coordinate capture'
+version '1.1.0'
+dependency 'ox_lib'
 ui_page 'html/index.html'
-
--- Main
-client_scripts {
-    'client/main.lua',
-}
-
--- Server
-server_scripts {
-    'server/main.lua',
-}
-
--- Config
-shared_scripts {
-    '@ox_lib/init.lua',
-    'shared/config.lua',
-
-}
-
--- HTML
-files {
-    'html/index.html',
-    'html/style.css',
-    'html/script.js'
-}
+shared_scripts { '@ox_lib/init.lua', 'shared/config.lua' }
+client_scripts { 'client/main.lua' }
+server_scripts { 'server/main.lua' }
+files { 'html/index.html', 'html/style.css', 'html/script.js' }
