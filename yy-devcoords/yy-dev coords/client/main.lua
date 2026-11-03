@@ -1,9 +1,17 @@
 local active, groups, selectedGroup, selectedCollection = false, {}, nil, nil
 local format, point, heading = 'vector4', nil, 0.0
 local lastDisplay = 0
+local pendingMenu = false
+local menu
 local function notify(msg, kind) lib.notify({title='PM DevCoords',description=msg,type=kind or 'inform'}) end
 RegisterNetEvent('pm-devcoords:notify', notify)
-RegisterNetEvent('pm-devcoords:data', function(data) groups = data or {} end)
+RegisterNetEvent('pm-devcoords:data', function(data)
+    groups = data or {}
+    if pendingMenu and active then
+        pendingMenu = false
+        menu()
+    end
+end)
 local function aim()
     local origin, rot = GetGameplayCamCoord(), GetGameplayCamRot(2)
     local x, z = math.rad(rot.x), math.rad(rot.z)
@@ -22,7 +30,7 @@ local function capture(name)
         coords={x=point.x,y=point.y,z=point.z,h=heading}
     })
 end
-local function menu()
+menu = function()
     if not active then return notify('Start /devcoords first.','error') end
     local opts = {
         {title='New group / collection',onSelect=function()
@@ -88,8 +96,8 @@ RegisterNetEvent('pm-devcoords:toggle',function()
     active=not active
     SendNUIMessage({action=active and 'open' or 'close'})
     if not active then return end
+    pendingMenu = true
     TriggerServerEvent('pm-devcoords:request')
-    menu()
     CreateThread(function()
         while active do
             point,heading=aim()
@@ -112,8 +120,12 @@ RegisterNetEvent('pm-devcoords:toggle',function()
     end)
 end)
 RegisterCommand('devcoordsmenu',function()
-    if active then TriggerServerEvent('pm-devcoords:request') end
-    menu()
+    if active then
+        pendingMenu = true
+        TriggerServerEvent('pm-devcoords:request')
+    else
+        menu()
+    end
 end,false)
 RegisterCommand('devcoords_capture',function() capture() end,false)
 RegisterCommand('devcoords_undo',function()
