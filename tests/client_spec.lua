@@ -48,6 +48,8 @@ end
 assert(select)
 select()
 assert(lastNotify.description=='Selected Row')
+commands.devcoordsmenu()
+events['pm-devcoords:data']({Test={Row={}}})
 -- Verify the actual ox_lib context options and format switch.
 local formatOption, namedOption, reviewOption, newOption
 for _,item in ipairs(contexts.pm_devcoords.options) do
