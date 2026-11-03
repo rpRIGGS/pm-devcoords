@@ -89,8 +89,10 @@ menu = function()
         opts[#opts+1]={title='Undo last point',onSelect=function()
             TriggerServerEvent('pm-devcoords:undo',selectedGroup,selectedCollection)
         end}
-        opts[#opts+1]={title='Export group',onSelect=function()
+        opts[#opts+1]={title='Finish / Export group (.txt)',description='Save a readable text export and clear the current selection',onSelect=function()
             TriggerServerEvent('pm-devcoords:export',selectedGroup)
+            selectedGroup, selectedCollection = nil, nil
+            notify('Group export requested. Choose another group to continue.')
         end}
     end
     lib.registerContext({id='pm_devcoords',title='PM DevCoords',options=opts})
