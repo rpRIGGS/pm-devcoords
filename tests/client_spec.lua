@@ -1,7 +1,7 @@
 -- Execute actual client/main.lua with mocked FiveM and ox_lib interfaces.
 local events, commands, threads, serverEvents, messages, contexts = {}, {}, {}, {}, {}, {}
 local now, hit = 1000, 1
-local selectedMenu, lastNotify
+local selectedMenu, lastNotify, dialogResult
 local function v(x,y,z)
   return setmetatable({x=x,y=y,z=z}, {__add=function(a,b) return v(a.x+b.x,a.y+b.y,a.z+b.z) end,
     __mul=function(a,b) if type(a)=='number' then return v(a*b.x,a*b.y,a*b.z) end return v(a.x*b,a.y*b,a.z*b) end})
@@ -12,7 +12,7 @@ lib={
   notify=function(data) lastNotify=data end,
   registerContext=function(data) contexts[data.id]=data end,
   showContext=function(id) selectedMenu=id end,
-  inputDialog=function() return nil end
+  inputDialog=function() local result=dialogResult; dialogResult=nil; return result end
 }
 RegisterNetEvent=function(n,fn) events[n]=fn end
 RegisterCommand=function(n,fn) commands[n]=fn end
@@ -48,6 +48,26 @@ end
 assert(select)
 select()
 assert(lastNotify.description=='Selected Row')
+-- Verify the actual ox_lib context options and format switch.
+local formatOption, namedOption, reviewOption, newOption
+for _,item in ipairs(contexts.pm_devcoords.options) do
+  if item.title=='Format: vector4' then formatOption=item.onSelect end
+  if item.title=='Capture named point' then namedOption=item.onSelect end
+  if item.title=='Review captured points' then reviewOption=item.onSelect end
+  if item.title=='New group / collection' then newOption=item.onSelect end
+end
+assert(formatOption and namedOption and reviewOption and newOption)
+formatOption()
+assert(lastNotify.description=='Selected vector3')
+dialogResult={'Another','North','Row_B'}
+newOption()
+assert(serverEvents[#serverEvents].name=='pm-devcoords:create')
+assert(serverEvents[#serverEvents].args[2]=='North/Row_B')
+-- Restore selected collection for capture.
+events['pm-devcoords:data']({Test={Row={}}})
+for _,item in ipairs(contexts.pm_devcoords.options) do
+  if item.title=='Test / Row' then item.onSelect() end
+end
 local ok,err=pcall(threads[#threads])
 assert(not ok and tostring(err):find('TEST_YIELD'))
 assert(messages[#messages].action=='update')
@@ -55,8 +75,14 @@ assert(messages[#messages].vector3=='vector3(10.000, 20.000, 30.000)')
 assert(messages[#messages].vector4=='vector4(10.000, 20.000, 30.000, 270.00)')
 commands.devcoords_capture()
 assert(serverEvents[#serverEvents].name=='pm-devcoords:capture')
-assert(serverEvents[#serverEvents].args[3].format=='vector4')
+assert(serverEvents[#serverEvents].args[3].format=='vector3')
 assert(serverEvents[#serverEvents].args[3].name==nil)
+dialogResult={'Picker_Start'}
+namedOption()
+assert(serverEvents[#serverEvents].args[3].name=='Picker_Start')
+events['pm-devcoords:data']({Test={Row={{name='Picker_Start',format='vector3',coords={x=10,y=20,z=30,h=270}}}}})
+reviewOption()
+assert(contexts.pm_devcoords_review.options[1].title=='1. Picker_Start')
 commands.devcoords_undo()
 assert(serverEvents[#serverEvents].name=='pm-devcoords:undo')
 events['pm-devcoords:toggle']()
