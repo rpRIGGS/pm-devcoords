@@ -165,6 +165,7 @@ RegisterNetEvent('pm-devcoords:export', function(group)
     local ok, filename = exportGroup(group)
     if ok then
         notify(src, 'Saved ' .. filename, 'success')
+        TriggerClientEvent('pm-devcoords:exported', src, group, filename)
     else
         notify(src, 'Text export failed.', 'error')
     end
