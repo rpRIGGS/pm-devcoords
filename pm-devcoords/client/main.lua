@@ -5,9 +5,16 @@ local lastAim = 0
 local aimHit = false
 local pointerGeneration = 0
 local pendingMenu = false
+local pendingFinish = nil
 local menu
 local function notify(msg, kind) lib.notify({title='PM DevCoords',description=msg,type=kind or 'inform'}) end
 RegisterNetEvent('pm-devcoords:notify', notify)
+RegisterNetEvent('pm-devcoords:exported', function(group)
+    if pendingFinish == group then
+        pendingFinish = nil
+        if selectedGroup == group then selectedGroup, selectedCollection = nil, nil end
+    end
+end)
 RegisterNetEvent('pm-devcoords:data', function(data)
     groups = data or {}
     if pendingMenu and active then
@@ -90,9 +97,8 @@ menu = function()
             TriggerServerEvent('pm-devcoords:undo',selectedGroup,selectedCollection)
         end}
         opts[#opts+1]={title='Finish / Export group (.txt)',description='Save a readable text export and clear the current selection',onSelect=function()
+            pendingFinish = selectedGroup
             TriggerServerEvent('pm-devcoords:export',selectedGroup)
-            selectedGroup, selectedCollection = nil, nil
-            notify('Group export requested. Choose another group to continue.')
         end}
     end
     lib.registerContext({id='pm_devcoords',title='PM DevCoords',options=opts})
