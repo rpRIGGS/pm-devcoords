@@ -28,9 +28,11 @@ local function menu()
         {title='New group / collection',onSelect=function()
             local input=lib.inputDialog('New collection',{
                 {type='input',label='Group',required=true,default=selectedGroup},
-                {type='input',label='Collection',required=true}})
+                {type='input',label='Subgroup (optional, e.g. Row_01)'},
+                {type='input',label='Collection (e.g. SideA)',required=true}})
             if not input then return end
-            selectedGroup,selectedCollection=input[1],input[2]
+            selectedGroup=input[1]
+            selectedCollection=(input[2] and input[2] ~= '' and (input[2] .. '/') or '') .. input[3]
             TriggerServerEvent('pm-devcoords:create',selectedGroup,selectedCollection)
         end},
         {title='Format: '..format,onSelect=function()
