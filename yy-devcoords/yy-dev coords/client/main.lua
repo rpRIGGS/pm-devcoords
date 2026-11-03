@@ -95,7 +95,10 @@ end
 RegisterNetEvent('pm-devcoords:toggle',function()
     active=not active
     SendNUIMessage({action=active and 'open' or 'close'})
-    if not active then return end
+    if not active then
+        pendingMenu = false
+        return
+    end
     pendingMenu = true
     TriggerServerEvent('pm-devcoords:request')
     CreateThread(function()
@@ -136,5 +139,9 @@ end,false)
 RegisterKeyMapping('devcoords_capture','PM DevCoords capture point','keyboard','J')
 RegisterKeyMapping('devcoords_undo','PM DevCoords undo point','keyboard','K')
 AddEventHandler('onResourceStop',function(name)
-    if name==GetCurrentResourceName() then active=false SendNUIMessage({action='close'}) end
+    if name==GetCurrentResourceName() then
+        active = false
+        pendingMenu = false
+        SendNUIMessage({action='close'})
+    end
 end)
