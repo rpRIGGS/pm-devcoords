@@ -26,7 +26,7 @@
 
 Install the inner `pm-devcoords` folder, ensure `ox_lib` first, then `pm-devcoords`. Configure `add_ace group.admin command.devcoords allow` or equivalent inherited administrator ACE. Actual file writes occur under the server's installed resource directory; preserve `captures.json` and generated exports when updating.
 
-**Runtime verification has not been performed here.** In FiveM check: (1) permitted and denied users; (2) menu opening, group/collection creation and selection; (3) camera aim and vector4 heading; (4) J capture, named capture, review and K undo; (5) restart and resume; (6) export file existence and Lua structure. Fix any issues observed in those tests before declaring a validated release.
+Automated checks are defined in `.github/workflows/validate.yml`: Lua syntax, mocked server logic (`tests/server_spec.lua`), and NUI message handling (`tests/nui_spec.js`). GitHub Actions results must be checked before describing these checks as passing. **FiveM runtime verification has not been performed here.** In FiveM check: (1) permitted and denied users; (2) menu opening, group/collection creation and selection; (3) camera aim and vector4 heading; (4) J capture, named capture, review and K undo; (5) restart and resume; (6) export file existence and Lua structure. Fix any issues observed in those tests before declaring a validated release.
 
 ## Attribution
 
