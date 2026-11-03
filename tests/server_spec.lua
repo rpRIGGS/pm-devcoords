@@ -1,6 +1,5 @@
 -- Runs against real server/main.lua with mocked FiveM APIs.
 local commands, events, files, notices = {}, {}, {}, {}
-local currentSource = 1
 local authorized = { [1] = true, [2] = false }
 local failWrites = false
 GetCurrentResourceName = function() return 'pm-devcoords' end
@@ -19,24 +18,9 @@ SaveResourceFile = function(_, name, content)
     files[name] = content
     return true
 end
-local function encode(v)
-    if type(v) == 'table' then
-        local n, entries = #v, {}
-        if n > 0 then
-            for i=1,n do entries[#entries+1] = encode(v[i]) end
-            return '[' .. table.concat(entries, ',') .. ']'
-        end
-        for k, value in pairs(v) do
-            entries[#entries+1] = string.format('%q:%s', k, encode(value))
-        end
-        return '{' .. table.concat(entries, ',') .. '}'
-    end
-    if type(v) == 'string' then return string.format('%q', v) end
-    return tostring(v)
-end
-json = { encode = encode, decode = function() return {} end }
+local cjson = require('cjson')
+json = { encode = cjson.encode, decode = cjson.decode }
 local function emit(src, name, ...)
-    currentSource = src
     _G.source = src
     assert(events[name], 'missing event ' .. name)(...)
 end
@@ -70,4 +54,21 @@ emit(1, 'pm-devcoords:export', 'Vineyard_01A')
 assert(not files['exports/Vineyard_01A.lua']:find('Point_02',1,true))
 emit(1, 'pm-devcoords:create', '../invalid', 'x')
 assert(not files['exports/invalid.lua'])
-print('PASS: ACE, create, capture, auto numbering, nested export, undo, failed write rollback, invalid names')
+-- Verify generated export is syntactically valid Lua and retains point values.
+vector3 = function(x,y,z) return {x=x,y=y,z=z} end
+vector4 = function(x,y,z,h) return {x=x,y=y,z=z,h=h} end
+local exportedCode = assert(files['exports/Vineyard_01A.lua'])
+local chunk = assert(load(exportedCode, '@exported.lua', 't', {vector3=vector3,vector4=vector4}))
+local decodedExport = chunk()
+assert(decodedExport.Vineyard_01A.Row_01.SideA[1].coords.h == 90)
+-- Simulate a server resource restart: reload from saved JSON.
+events, commands = {}, {}
+dofile('pm-devcoords/server/main.lua')
+emit(1, 'pm-devcoords:request')
+local latest = notices[#notices]
+assert(latest.name == 'pm-devcoords:data')
+assert(latest.args[1].Vineyard_01A.Row_01.SideA[1].coords.x == 1.2345)
+emit(1, 'pm-devcoords:capture', 'Vineyard_01A', 'Row_01/SideA', point)
+emit(1, 'pm-devcoords:export', 'Vineyard_01A')
+assert(files['exports/Vineyard_01A.lua']:find('Point_02',1,true))
+print('PASS: ACE, create, capture, auto numbering, nested export, undo, failed write rollback, invalid names, Lua export execution, JSON reload')
