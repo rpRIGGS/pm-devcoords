@@ -67,7 +67,7 @@ dofile('pm-devcoords/server/main.lua')
 emit(1, 'pm-devcoords:request')
 local latest = notices[#notices]
 assert(latest.name == 'pm-devcoords:data')
-assert(latest.args[1].Vineyard_01A.Row_01.SideA[1].coords.x == 1.2345)
+assert(latest.args[1].Vineyard_01A['Row_01/SideA'][1].coords.x == 1.2345)
 emit(1, 'pm-devcoords:capture', 'Vineyard_01A', 'Row_01/SideA', point)
 emit(1, 'pm-devcoords:export', 'Vineyard_01A')
 assert(files['exports/Vineyard_01A.lua']:find('Point_02',1,true))
