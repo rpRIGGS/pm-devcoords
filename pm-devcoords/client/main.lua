@@ -2,6 +2,7 @@ local active, groups, selectedGroup, selectedCollection = false, {}, nil, nil
 local format, point, heading = 'vector4', nil, 0.0
 local lastDisplay = 0
 local lastAim = 0
+local aimHit = false
 local pendingMenu = false
 local menu
 local function notify(msg, kind) lib.notify({title='PM DevCoords',description=msg,type=kind or 'inform'}) end
@@ -20,10 +21,11 @@ local function aim()
     local dest = origin + dir * (Config.MaxDistance or 80.0)
     local ray = StartExpensiveSynchronousShapeTestLosProbe(origin.x,origin.y,origin.z,dest.x,dest.y,dest.z,-1,PlayerPedId(),7)
     local _, hit, pos = GetShapeTestResult(ray)
-    return hit == 1 and pos or dest, (-rot.z) % 360.0
+    return hit == 1 and pos or dest, (-rot.z) % 360.0, hit == 1
 end
 local function capture(name)
     if not active or not point then return end
+    if not aimHit then return notify('Aim at a surface before capturing.', 'error') end
     if not selectedGroup or not selectedCollection then return notify('Choose a collection with /devcoordsmenu.','error') end
     TriggerServerEvent('pm-devcoords:capture',selectedGroup,selectedCollection,{
         name=name,format=format,
@@ -97,6 +99,8 @@ RegisterNetEvent('pm-devcoords:toggle',function()
     SendNUIMessage({action=active and 'open' or 'close'})
     if not active then
         pendingMenu = false
+        point = nil
+        aimHit = false
         return
     end
     pendingMenu = true
@@ -104,7 +108,7 @@ RegisterNetEvent('pm-devcoords:toggle',function()
     CreateThread(function()
         while active do
             if not point or GetGameTimer() - lastAim >= 50 then
-                point,heading=aim()
+                point,heading,aimHit=aim()
                 lastAim=GetGameTimer()
             end
             local ped=GetEntityCoords(PlayerPedId())
