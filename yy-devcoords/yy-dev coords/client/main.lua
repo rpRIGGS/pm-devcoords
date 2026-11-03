@@ -15,7 +15,7 @@ local function aim()
 end
 local function capture(name)
     if not active or not point then return end
-    if not selectedGroup or not selectedCollection then return notify('Choose a collection first (M).','error') end
+    if not selectedGroup or not selectedCollection then return notify('Choose a collection with /devcoordsmenu.','error') end
     local list = groups[selectedGroup] and groups[selectedGroup][selectedCollection] or {}
     TriggerServerEvent('pm-devcoords:capture',selectedGroup,selectedCollection,{
         name=name or ('Point_%02d'):format(#list+1),format=format,
@@ -73,6 +73,10 @@ RegisterNetEvent('pm-devcoords:toggle',function()
     if not active then return end
     TriggerServerEvent('pm-devcoords:request')
     CreateThread(function()
+        Wait(250)
+        if active then menu() end
+    end)
+    CreateThread(function()
         while active do
             point,heading=aim()
             local ped=GetEntityCoords(PlayerPedId())
@@ -100,7 +104,6 @@ RegisterCommand('devcoords_undo',function()
         TriggerServerEvent('pm-devcoords:undo',selectedGroup,selectedCollection)
     end
 end,false)
-RegisterKeyMapping('devcoordsmenu','PM DevCoords menu','keyboard','M')
 RegisterKeyMapping('devcoords_capture','PM DevCoords capture point','keyboard','J')
 RegisterKeyMapping('devcoords_undo','PM DevCoords undo point','keyboard','K')
 AddEventHandler('onResourceStop',function(name)
