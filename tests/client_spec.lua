@@ -51,14 +51,15 @@ assert(lastNotify.description=='Selected Row')
 commands.devcoordsmenu()
 events['pm-devcoords:data']({Test={Row={}}})
 -- Verify the actual ox_lib context options and format switch.
-local formatOption, namedOption, reviewOption, newOption
+local formatOption, namedOption, reviewOption, newOption, finishOption
 for _,item in ipairs(contexts.pm_devcoords.options) do
   if item.title=='Format: vector4' then formatOption=item.onSelect end
   if item.title=='Capture named point' then namedOption=item.onSelect end
   if item.title=='Review captured points' then reviewOption=item.onSelect end
   if item.title=='New group / collection' then newOption=item.onSelect end
+  if item.title=='Finish / Export group (.txt)' then finishOption=item.onSelect end
 end
-assert(formatOption and namedOption and reviewOption and newOption)
+assert(formatOption and namedOption and reviewOption and newOption and finishOption)
 formatOption()
 assert(lastNotify.description=='Selected vector3')
 dialogResult={'Another','North','Row_B'}
@@ -87,10 +88,15 @@ reviewOption()
 assert(contexts.pm_devcoords_review.options[1].title=='1. Picker_Start')
 commands.devcoords_undo()
 assert(serverEvents[#serverEvents].name=='pm-devcoords:undo')
+finishOption()
+assert(serverEvents[#serverEvents].name=='pm-devcoords:export')
+events['pm-devcoords:exported']('Test','exports/Test.txt')
+commands.devcoords_capture()
+assert(lastNotify.description=='Choose a collection with /devcoordsmenu.')
 events['pm-devcoords:toggle']()
 assert(messages[#messages].action=='close')
 commands.devcoords_capture()
-assert(serverEvents[#serverEvents].name=='pm-devcoords:undo')
+assert(serverEvents[#serverEvents].name=='pm-devcoords:export')
 events['pm-devcoords:toggle']()
 hit=0
 now=1100
