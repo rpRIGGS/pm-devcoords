@@ -1,6 +1,7 @@
 local active, groups, selectedGroup, selectedCollection = false, {}, nil, nil
 local format, point, heading = 'vector4', nil, 0.0
 local lastDisplay = 0
+local lastAim = 0
 local pendingMenu = false
 local menu
 local function notify(msg, kind) lib.notify({title='PM DevCoords',description=msg,type=kind or 'inform'}) end
@@ -102,7 +103,10 @@ RegisterNetEvent('pm-devcoords:toggle',function()
     TriggerServerEvent('pm-devcoords:request')
     CreateThread(function()
         while active do
-            point,heading=aim()
+            if not point or GetGameTimer() - lastAim >= 50 then
+                point,heading=aim()
+                lastAim=GetGameTimer()
+            end
             local ped=GetEntityCoords(PlayerPedId())
             local color=Config.LineColor
             DrawLine(ped.x,ped.y,ped.z+0.2,point.x,point.y,point.z,color.r,color.g,color.b,color.a)
