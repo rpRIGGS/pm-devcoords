@@ -41,18 +41,17 @@ Original project: [yy-devcoords](https://github.com/LuckyyFishyy/yy-devcoords) b
 
 The `.txt` file contains readable named Lua-style `vector3(...)` / `vector4(...)` coordinates, grouped by row and side, suitable for copying into chat. It is stored on the **server**, not automatically downloaded to your PC's client folder.
 
-## Developer utilities restored from qb-adminmenu
+## Developer tools ported from qb-adminmenu
 
-Use **`/devadmin`** for an ox_lib development menu. It provides: existing pointer/group coordinate collector, copy player `vector2`, `vector3`, `vector4`, heading to clipboard, live coordinate HUD, vehicle spawn by model, delete, max upgrades, vehicle developer HUD, full entity free-aim inspection (E delete, G freeze/unfreeze, H copy aimed coordinates), nearby object/vehicle/ped information, entity model copy, waypoint teleport, and save current vehicle to your player garage database.
+Use **/devadmin** to open the ox_lib developer menu. The original qb-adminmenu developer tools are integrated into this single PM DevCoords resource, alongside the original pointer-based coordinate collector.
 
-Restored slash commands: **`/vector2`**, **`/vector3`**, **`/vector4`**, **`/heading`**, **`/coords`**, **`/admincar`**, and **`/devadmin`**. Existing **`/devcoords`** and **`/devcoordsmenu`** remain unchanged. The vector commands copy your **player's** location; the pointer collector captures the aimed world position. `/admincar` requires you to be driving a model listed in `QBCore.Shared.Vehicles`; the vehicle plate must not already be in `player_vehicles`. Vehicle spawning is temporary; `/admincar` registers it in the QBCore vehicle database.
+- **Coordinates:** /vector2, /vector3, /vector4, /heading, /coords; two-decimal clipboard output and live vector4 HUD. The pointer collector retains /devcoords, /devcoordsmenu, J capture, K undo, group/row/side selection and .txt export.
+- **Vehicles:** /maxmods applies the original performance slots (11, 12, 13, 15, 16, turbo); /admincar saves the driven vehicle's properties into QBCore player_vehicles after model, plate and ownership validation. Vehicle developer HUD displays entity ID, net ID, model name/hash, engine and body health.
+- **Entity viewer:** original qb-adminmenu raycast, detailed aimed entity panel, 3D bounding boxes, nearby objects/vehicles/peds, 5–50m radius, E delete, G freeze/unfreeze, H copy pointed vector3, and full entity information clipboard output. The viewer supports an independently toggled free-aim mode.
+- **Additional developer commands:** /setmodel <model> [player id], /setspeed fast|normal, waypoint teleport and developer mode invincibility toggle.
 
-Access: ACE `command.devcoords` **or** QBCore `admin`/`god` permissions. The existing coordinate collector retains its original ACE requirement, so grant `command.devcoords` to admins who need that collector. This resource does not replace Legend's server/player administration features.
+**Excluded intentionally:** vehicle spawning, /repair, /dv and NoClip, which are already provided by Legend or txAdmin. There is no reason to duplicate those features. The original qb-adminmenu vehicle category browser belongs to its vehicle spawner and is likewise excluded.
 
-**Status:** automated checks are not a substitute for testing the development menu and QBCore garage schema in a live FiveM server. The NoClip and vehicle utilities should be verified in-game before relying on them.
+**Permissions:** /devadmin and developer slash commands require ACE `command.devcoords` or QBCore admin/god. The original pointer collector continues to require ACE `command.devcoords`. Use `add_ace group.admin command.devcoords allow` (or an equivalent principal grant) if appropriate for your server permissions.
 
-### Original qb-adminmenu entity-view controls
-
-Open `/devadmin` → **Entity viewer: free aim (E/G/H)**. Aim at an object, vehicle, or NPC to see its model hash, entity ID, network ID, heading, and position. **E** deletes the targeted entity, **G** freezes/unfreezes it, and **H** copies the aimed world coordinates as `vector3(...)` to the clipboard. The nearby-object, vehicle, and ped views can be toggled independently; their inspection radius is adjustable. Avoid deleting map/world objects you need; deletion is not undoable. These are client-side developer utilities, not replacements for server-wide persistent world editing.
-
-Legend already supplies repair and NoClip, so the new `/devadmin` menu does not duplicate those entries. The prior internal NoClip/repair helper code is not exposed in the menu.
+**Validation:** GitHub Actions checks Lua syntax and the repository's automated tests. Live FiveM verification remains required for client natives, entity controls, clipboard, /admincar database writes, and coexistence with Legend/txAdmin. A passing CI run is not a claim of successful in-game testing.
