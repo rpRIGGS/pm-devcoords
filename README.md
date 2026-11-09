@@ -13,7 +13,7 @@ Aim at a world surface (a successful raycast hit is required to save), capture `
 
 ## Use
 
-- `/devcoords`: open the unified PM DevCoords developer menu (also available as `/devadmin`).
+- `/devadmin`: open the unified PM DevCoords developer menu.
 - **Coordinate collector** in the main menu: start or stop the pointer capture overlay and open its collection menu.
 - `/devcoordsmenu`: reopen the menu while the tool is active.
 - `J`: capture the aimed point into the selected collection.
@@ -34,7 +34,7 @@ Original project: [yy-devcoords](https://github.com/LuckyyFishyy/yy-devcoords) b
 
 ## Vineyard capture example
 
-1. Run `/devcoords`, select **Coordinate collector**, and choose **New group / collection**: Group `V01A`, Subgroup `Row_01`, Collection `SideA`.
+1. Run `/devadmin`, select **Coordinate collector**, and choose **New group / collection**: Group `V01A`, Subgroup `Row_01`, Collection `SideA`.
 2. Aim at each position and press **J**. Each capture immediately saves to `captures.json`; no separate save action is needed.
 3. Reopen the menu with `/devcoordsmenu`, create `V01A / Row_01 / SideB`, and capture Side B points with **J**.
 4. Continue with other rows as needed. Choose **Finish / Export group (.txt)** to write `V01A.txt` and clear the selection **after a successful export**.
@@ -44,7 +44,7 @@ The `.txt` file contains readable named Lua-style `vector3(...)` / `vector4(...)
 
 ## Developer tools ported from qb-adminmenu
 
-Use **/devcoords** or its alias **/devadmin** to open the same ox_lib developer menu. The original qb-adminmenu developer tools are integrated into this single PM DevCoords resource, alongside the original pointer-based coordinate collector.
+Use **/devadmin** to open the unified ox_lib developer menu. The original qb-adminmenu developer tools are integrated into this single PM DevCoords resource, alongside the original pointer-based coordinate collector.
 
 - **Coordinates:** /vector2, /vector3, /vector4, /heading, /coords; two-decimal clipboard output and live vector4 HUD. The pointer collector is launched from the unified menu and retains /devcoordsmenu, J capture, K undo, group/row/side selection and .txt export.
 - **Vehicles:** /maxmods applies the original performance slots (11, 12, 13, 15, 16, turbo); /admincar saves the driven vehicle's properties into QBCore player_vehicles after server-side driver, model and plate validation. Vehicle developer HUD displays entity ID, net ID, model name/hash, engine and body health.
