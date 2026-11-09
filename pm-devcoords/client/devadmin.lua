@@ -79,16 +79,14 @@ end
 CreateThread(function()
     while true do
         if showVehicleInfo then
-            if showVehicleInfo then
                 local car=GetVehiclePedIsIn(PlayerPedId(),false)
                 if car~=0 then
                     local hash=GetEntityModel(car)
                     drawLabel(0.4,0.888,'Vehicle Developer Data')
-                    drawLabel(0.4,0.913,('Entity: %s | Network: %s'):format(car,NetworkGetNetworkIdFromEntity(car)))
-                    drawLabel(0.4,0.938,('Model: %s | Hash: %s'):format(GetLabelText(GetDisplayNameFromVehicleModel(hash)),hash))
+                    drawLabel(0.4,0.913,('Entity: %s | Network: %s'):format(car,NetworkGetEntityIsNetworked(car) and NetworkGetNetworkIdFromEntity(car) or 'not networked'))
+                    drawLabel(0.4,0.938,('Model: %s | Hash: %s'):format(GetDisplayNameFromVehicleModel(hash),hash))
                     drawLabel(0.4,0.963,('Engine: %.2f | Body: %.2f'):format(GetVehicleEngineHealth(car),GetVehicleBodyHealth(car)))
                 end
-            end
             Wait(0)
         else Wait(300) end
     end
