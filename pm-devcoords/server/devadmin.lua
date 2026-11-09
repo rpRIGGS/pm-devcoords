@@ -64,3 +64,16 @@ RegisterNetEvent('pm-devcoords:devadmin:savecar', function(props)
     if not ok or not result then return tell(src, 'Vehicle save failed or plate already exists.', 'error') end
     tell(src, 'Vehicle saved to player_vehicles: '..plate, 'success')
 end)
+
+RegisterCommand('setmodel', function(src,args)
+    if not permitted(src) then return tell(src,'Developer permission required.','error') end
+    local model=args[1]
+    if not model or model=='' then return tell(src,'Usage: /setmodel model [player id]','error') end
+    local target=tonumber(args[2]) or src
+    if not QBCore.Functions.GetPlayer(target) then return tell(src,'Player not online.','error') end
+    TriggerClientEvent('pm-devcoords:devadmin:setmodel',target,model)
+end,false)
+RegisterCommand('setspeed', function(src,args)
+    if not permitted(src) then return tell(src,'Developer permission required.','error') end
+    TriggerClientEvent('pm-devcoords:devadmin:setspeed',src,args[1]=='fast' and 'fast' or 'normal')
+end,false)
