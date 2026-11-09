@@ -79,7 +79,7 @@ local RayCastGamePlayCamera = function(distance)
     }
     local handle = StartExpensiveSynchronousShapeTestLosProbe(cameraCoord.x, cameraCoord.y, cameraCoord.z, destination.x, destination.y, destination.z, -1, PlayerPedId(), 7)
     local _, hit, coords, _, entity = GetShapeTestResult(handle)
-    return hit == 1, coords or vector3(destination.x,destination.y,destination.z), entity or 0
+    return hit == true or hit == 1, coords or vector3(destination.x,destination.y,destination.z), entity or 0
 end
 
 local DrawEntityBoundingBox = function(entity, color)
