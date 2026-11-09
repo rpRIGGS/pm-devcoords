@@ -7,7 +7,10 @@ exports = {['qb-core'] = {GetCoreObject = function()
         GetPlayer = function(src) if src == 1 then return {PlayerData={license='license:test',citizenid='CID1'}} end end
     },Shared={Vehicles={adder={model='adder',hash=1234}}}}
 end}}
-IsPlayerAceAllowed = function() return false end
+IsPlayerAceAllowed = function(src, ace)
+    assert(ace == 'command.devcoords')
+    return src == 1
+end
 RegisterCommand = function(name, callback) commands[name]=callback end
 RegisterNetEvent = function(name, callback) events[name]=callback end
 TriggerClientEvent = function(name, target, ...)
