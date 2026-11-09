@@ -15,6 +15,8 @@ jobs:
           find pm-devcoords -type f -name '*.lua' ! -path '*/exports/*' -print0 | xargs -0 -n1 luac -p
       - name: Test server logic with FiveM mocks
         run: lua5.4 tests/server_spec.lua
+      - name: Test developer command port and database guards
+        run: lua5.4 tests/devadmin_spec.lua
       - name: Test client logic with FiveM and ox_lib mocks
         run: lua5.4 tests/client_spec.lua
       - name: Test HTML overlay
