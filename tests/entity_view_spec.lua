@@ -21,7 +21,10 @@ IsEntityAnObject=function() return false end
 GetEntityType=function() return 2 end
 GetEntityModel=function() return 123 end
 GetDisplayNameFromVehicleModel=function() return 'TESTCAR' end
-NetworkGetEntityIsNetworked=function() return false end
+local networked, control, requests = false, true, 0
+NetworkGetEntityIsNetworked=function() return networked end
+NetworkHasControlOfEntity=function() return control end
+NetworkRequestControlOfEntity=function() requests=requests+1 end
 GetEntityCoords=function(id) return id==1 and v(0,0,0) or v(1,2,3) end
 GetEntityHeading=function() return 90 end
 GetEntityRotation=function() return v(0,0,0) end
@@ -76,12 +79,21 @@ assert(clipboard=='vector3(1.0, 2.0, 3.0)')
 assert(lines>=12,'3D bounding box not drawn')
 pressed[74]=nil
 pressed[47]=true
+networked=true
+control=false
+runframe()
+assert(requests==1 and frozen==nil, 'networked entity frozen without control')
+control=true
 runframe()
 assert(frozen==true)
 runframe()
 assert(frozen==false)
 pressed[47]=nil
 pressed[38]=true
+control=false
+runframe()
+assert(requests==2 and deleted==false, 'networked entity deleted without control')
+control=true
 runframe()
 assert(deleted==true)
 pressed[38]=nil
