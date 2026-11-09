@@ -365,25 +365,31 @@ RunEntityViewThread = function()
                     DrawEntityViewText(entity)
 
                     if IsControlJustReleased(0, 47) then -- Freeze entities
-                        if FrozenEntities[entity] then
-                            FrozenEntities[entity] = not FrozenEntities[entity]
+                        if NetworkGetEntityIsNetworked(entity) and not NetworkHasControlOfEntity(entity) then
+                            NetworkRequestControlOfEntity(entity)
+                            PMNotify('Entity control requested; try again.', 'error')
                         else
-                            FrozenEntities[entity] = true
+                            local nextFrozen = not FrozenEntities[entity]
+                            FreezeEntityPosition(entity, nextFrozen)
+                            FrozenEntities[entity] = nextFrozen
+                            PMNotify(nextFrozen and 'Entity frozen' or 'Entity unfrozen', 'success')
                         end
-
-                        FreezeEntityPosition(entity, FrozenEntities[entity])
-                        PMNotify(FrozenEntities[entity] and 'Entity frozen' or 'Entity unfrozen', 'success')
                     end
 
                     if IsControlJustReleased(0, 38) then -- Delete entity
-                        -- Set as missionEntity so the object can be remove (Even map objects)
-                        SetEntityAsMissionEntity(entity, true, true)
-                        DeleteEntity(entity)
-
-                        if not DoesEntityExist(entity) then
-                            PMNotify("Entity deleted", 'success')
+                        if NetworkGetEntityIsNetworked(entity) and not NetworkHasControlOfEntity(entity) then
+                            NetworkRequestControlOfEntity(entity)
+                            PMNotify('Entity control requested; try again.', 'error')
                         else
-                            PMNotify("Could not delete entity", 'error')
+                            SetEntityAsMissionEntity(entity, true, true)
+                            DeleteEntity(entity)
+                            if not DoesEntityExist(entity) then
+                                FrozenEntities[entity] = nil
+                                FreeAimEntity = nil
+                                PMNotify('Entity deleted', 'success')
+                            else
+                                PMNotify('Could not delete entity', 'error')
+                            end
                         end
                     end
                 else
