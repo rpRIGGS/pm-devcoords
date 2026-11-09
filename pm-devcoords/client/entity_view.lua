@@ -1,156 +1,479 @@
-local enabled = false
-local showObjects, showVehicles, showPeds = false, false, false
-local maxDistance = 12.0
-local frozen = {}
-local function notify(message, kind)
-    lib.notify({title='PM DevCoords',description=message,type=kind or 'inform'})
+local function PMRound(n, d) local p=10^(d or 0); return math.floor(n*p+0.5)/p end
+local function PMNotify(msg, kind) lib.notify({title='PM DevCoords',description=tostring(msg),type=kind or 'inform'}) end
+local FrozenEntities     = {}
+local EntityViewDistance = 10
+local EntityViewEnabled  = false
+local EntityFreeAim      = false
+local EntityPedView      = false
+local EntityObjectView   = false
+local EntityVehicleView  = false
+local FreeAimEntity      = nil
+
+-- Configurable values
+local FreeAimInfoBoxX    = 0.60 -- X-axis (0.0 being left, 1.0 being right position of the screen)
+local FreeAimInfoBoxY    = 0.02 -- Y-axis (0.0 being up, 1.0 being down position of the screen)
+local useKph             = true -- True to display KPH or false to display MPH
+
+local CanEntityBeUsed    = function(ped)
+    if ped == PlayerPedId() then
+        return false
+    end
+    return true
 end
-local function label(x,y,s)
-    SetTextFont(4); SetTextScale(0.32,0.32); SetTextColour(255,255,255,240)
-    SetTextOutline(); SetTextEntry('STRING'); AddTextComponentString(s); DrawText(x,y)
+
+local RoundFloat         = function(number, num)
+    return math.floor(number * math.pow(10, num) + 0.5) / math.pow(10, num)
 end
-local function aimed()
-    local origin,rot = GetGameplayCamCoord(),GetGameplayCamRot(2)
-    local pitch,yaw = math.rad(rot.x),math.rad(rot.z)
-    local direction=vector3(-math.sin(yaw)*math.cos(pitch),math.cos(yaw)*math.cos(pitch),math.sin(pitch))
-    local dest=origin+direction*1000.0
-    local handle=StartExpensiveSynchronousShapeTestLosProbe(origin.x,origin.y,origin.z,dest.x,dest.y,dest.z,-1,PlayerPedId(),7)
-    local _,hit,pos,_,entity=GetShapeTestResult(handle)
-    return hit==1,pos,entity
+
+local RoundVector3       = function(vector, num)
+    return 'vector3(' .. RoundFloat(vector.x, num) .. ', ' .. RoundFloat(vector.y, num) .. ', ' .. RoundFloat(vector.z, num) .. ')'
 end
-local function copyCoords(pos)
-    lib.setClipboard(('vector3(%.3f, %.3f, %.3f)'):format(pos.x,pos.y,pos.z))
-    notify('Aimed coordinates copied to clipboard.','success')
+
+
+local RelationshipTypes = { ['0'] = 'Companion', ['1'] = 'Respect', ['2'] = 'Like', ['3'] = 'Neutral', ['4'] = 'Dislike', ['5'] = 'Hate', ['255'] = 'Pedestrians' }
+local GetPedRelationshipType = function(value)
+    value = tostring(value)
+    return RelationshipTypes[value] or 'Unknown'
 end
-local function entityName(entity)
-    local hash = GetEntityModel(entity)
-    if IsEntityAVehicle(entity) then return GetDisplayNameFromVehicleModel(hash) end
-    return tostring(hash)
+
+local DrawTitle = function(text)
+    SetTextScale(0.50, 0.50)
+    SetTextFont(4)
+    SetTextDropshadow(1.0, 0, 0, 0, 255)
+    SetTextColour(255, 255, 255, 215)
+    SetTextJustification(0)
+    BeginTextCommandDisplayText('STRING')
+    AddTextComponentSubstringPlayerName(text)
+    EndTextCommandDisplayText(0.5, 0.02)
 end
-local function entityDetails(entity)
-    local c=GetEntityCoords(entity)
-    local r=GetEntityRotation(entity,2)
-    local v=GetEntityVelocity(entity)
-    local kind=GetEntityType(entity)
-    local networked=NetworkGetEntityIsNetworked(entity)
-    local net=networked and tostring(NetworkGetNetworkIdFromEntity(entity)) or 'not networked'
-    local owner=networked and tostring(GetPlayerServerId(NetworkGetEntityOwner(entity))) or 'local'
-    local lines={
-        ('Model: %s | Hash: %s'):format(entityName(entity),GetEntityModel(entity)),
-        ('Type: %s | Entity: %s | Net ID: %s | Owner: %s'):format(kind,entity,net,owner),
-        ('Distance: %.2f | Heading: %.2f'):format(#(GetEntityCoords(PlayerPedId())-c),GetEntityHeading(entity)),
-        ('Coords: vector3(%.2f, %.2f, %.2f)'):format(c.x,c.y,c.z),
-        ('Rotation: vector3(%.2f, %.2f, %.2f)'):format(r.x,r.y,r.z),
-        ('Velocity: vector3(%.2f, %.2f, %.2f)'):format(v.x,v.y,v.z)
+
+local RotationToDirection = function(rotation)
+    local adjustedRotation = {
+        x = (math.pi / 180) * rotation.x,
+        y = (math.pi / 180) * rotation.y,
+        z = (math.pi / 180) * rotation.z
     }
-    if kind==1 then
-        lines[#lines+1]=('Health: %s | Max health: %s | Armour: %s'):format(GetEntityHealth(entity),GetPedMaxHealth(entity),GetPedArmour(entity))
-        lines[#lines+1]=('Relationship group: %s | Relationship to player: %s'):format(GetPedRelationshipGroupHash(entity),GetRelationshipBetweenPeds(entity,PlayerPedId()))
-    elseif kind==2 then
-        lines[#lines+1]=('RPM: %.2f | Speed MPH: %.0f | Gear: %s'):format(GetVehicleCurrentRpm(entity),GetEntitySpeed(entity)*2.23694,GetVehicleCurrentGear(entity))
-        lines[#lines+1]=('Acceleration: %.2f | Engine: %.1f | Body: %.1f'):format(GetVehicleAcceleration(entity),GetVehicleEngineHealth(entity),GetVehicleBodyHealth(entity))
-    elseif kind==3 then
-        lines[#lines+1]=('Health: %s'):format(GetEntityHealth(entity))
+    local direction = {
+        x = -math.sin(adjustedRotation.z) * math.abs(math.cos(adjustedRotation.x)),
+        y = math.cos(adjustedRotation.z) * math.abs(math.cos(adjustedRotation.x)),
+        z = math.sin(adjustedRotation.x)
+    }
+    return direction
+end
+
+local RayCastGamePlayCamera = function(distance)
+    -- Checks to see if the Gameplay Cam is Rendering or another is rendering (no clip functionality)
+    local currentRenderingCam = false
+    if not IsGameplayCamRendering() then
+        currentRenderingCam = GetRenderingCam()
     end
-    return lines
+
+    local cameraRotation = not currentRenderingCam and GetGameplayCamRot() or GetCamRot(currentRenderingCam, 2)
+    local cameraCoord = not currentRenderingCam and GetGameplayCamCoord() or GetCamCoord(currentRenderingCam)
+    local direction = RotationToDirection(cameraRotation)
+    local destination = {
+        x = cameraCoord.x + direction.x * distance,
+        y = cameraCoord.y + direction.y * distance,
+        z = cameraCoord.z + direction.z * distance
+    }
+    local _, b, c, _, e = GetShapeTestResult(StartExpensiveSynchronousShapeTestLosProbe(cameraCoord.x, cameraCoord.y, cameraCoord.z, destination.x, destination.y, destination.z, -1, PlayerPedId(), 7))
+    return b, c, e
 end
-local function copyEntityInfo(entity)
-    local c=GetEntityCoords(entity)
-    local r=GetEntityRotation(entity,2)
-    lib.setClipboard(('Model Name:\\t%s\\nModel Hash:\\t%s\\n\\nHeading:\\t%.2f\\nCoords:\\t\\tvector3(%.2f, %.2f, %.2f)\\nRotation:\\tvector3(%.2f, %.2f, %.2f)'):format(entityName(entity),GetEntityModel(entity),GetEntityHeading(entity),c.x,c.y,c.z,r.x,r.y,r.z))
-    notify('Full entity information copied.','success')
+
+local DrawEntityBoundingBox = function(entity, color)
+    local model = GetEntityModel(entity)
+    local min, max = GetModelDimensions(model)
+    local rightVector, forwardVector, upVector, position = GetEntityMatrix(entity)
+
+    -- Calculate size
+    local dim = {
+        x = 0.5 * (max.x - min.x),
+        y = 0.5 * (max.y - min.y),
+        z = 0.5 * (max.z - min.z)
+    }
+
+    local FUR = {
+        x = position.x + dim.y * rightVector.x + dim.x * forwardVector.x + dim.z * upVector.x,
+        y = position.y + dim.y * rightVector.y + dim.x * forwardVector.y + dim.z * upVector.y,
+        z = 0
+    }
+
+    local _, FUR_z = GetGroundZFor_3dCoord(FUR.x, FUR.y, 1000.0, 0)
+    FUR.z = FUR_z
+    FUR.z = FUR.z + 2 * dim.z
+
+    local BLL = {
+        x = position.x - dim.y * rightVector.x - dim.x * forwardVector.x - dim.z * upVector.x,
+        y = position.y - dim.y * rightVector.y - dim.x * forwardVector.y - dim.z * upVector.y,
+        z = 0
+    }
+    local _, BLL_z = GetGroundZFor_3dCoord(FUR.x, FUR.y, 1000.0, 0)
+    BLL.z = BLL_z
+
+    -- DEBUG
+    local edge1 = BLL
+    local edge5 = FUR
+
+    local edge2 = {
+        x = edge1.x + 2 * dim.y * rightVector.x,
+        y = edge1.y + 2 * dim.y * rightVector.y,
+        z = edge1.z + 2 * dim.y * rightVector.z
+    }
+
+    local edge3 = {
+        x = edge2.x + 2 * dim.z * upVector.x,
+        y = edge2.y + 2 * dim.z * upVector.y,
+        z = edge2.z + 2 * dim.z * upVector.z
+    }
+
+    local edge4 = {
+        x = edge1.x + 2 * dim.z * upVector.x,
+        y = edge1.y + 2 * dim.z * upVector.y,
+        z = edge1.z + 2 * dim.z * upVector.z
+    }
+
+    local edge6 = {
+        x = edge5.x - 2 * dim.y * rightVector.x,
+        y = edge5.y - 2 * dim.y * rightVector.y,
+        z = edge5.z - 2 * dim.y * rightVector.z
+    }
+
+    local edge7 = {
+        x = edge6.x - 2 * dim.z * upVector.x,
+        y = edge6.y - 2 * dim.z * upVector.y,
+        z = edge6.z - 2 * dim.z * upVector.z
+    }
+
+    local edge8 = {
+        x = edge5.x - 2 * dim.z * upVector.x,
+        y = edge5.y - 2 * dim.z * upVector.y,
+        z = edge5.z - 2 * dim.z * upVector.z
+    }
+    color = (color == nil and { r = 255, g = 255, b = 255, a = 255 } or color)
+    DrawLine(edge1.x, edge1.y, edge1.z, edge2.x, edge2.y, edge2.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge1.x, edge1.y, edge1.z, edge4.x, edge4.y, edge4.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge2.x, edge2.y, edge2.z, edge3.x, edge3.y, edge3.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge3.x, edge3.y, edge3.z, edge4.x, edge4.y, edge4.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge5.x, edge5.y, edge5.z, edge6.x, edge6.y, edge6.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge5.x, edge5.y, edge5.z, edge8.x, edge8.y, edge8.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge6.x, edge6.y, edge6.z, edge7.x, edge7.y, edge7.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge7.x, edge7.y, edge7.z, edge8.x, edge8.y, edge8.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge1.x, edge1.y, edge1.z, edge7.x, edge7.y, edge7.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge2.x, edge2.y, edge2.z, edge8.x, edge8.y, edge8.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge3.x, edge3.y, edge3.z, edge5.x, edge5.y, edge5.z, color.r, color.g, color.b, color.a)
+    DrawLine(edge4.x, edge4.y, edge4.z, edge6.x, edge6.y, edge6.z, color.r, color.g, color.b, color.a)
 end
-RegisterNetEvent('pm-devcoords:devadmin:copyEntity',function()
-    local hit,_,entity=aimed()
-    if not hit or not entity or entity==0 or not DoesEntityExist(entity) then return notify('Aim at an entity first.','error') end
-    copyEntityInfo(entity)
-end)
-local function deleteAimed(entity)
-    if entity==PlayerPedId() or (IsEntityAPed(entity) and IsPedAPlayer(entity)) then return notify('Cannot delete players.','error') end
-    if NetworkGetEntityIsNetworked(entity) then
-        NetworkRequestControlOfEntity(entity)
-        local limit=GetGameTimer()+1000
-        while not NetworkHasControlOfEntity(entity) and GetGameTimer()<limit do Wait(0); NetworkRequestControlOfEntity(entity) end
-        if not NetworkHasControlOfEntity(entity) then return notify('No network control over entity.','error') end
+
+local GetEntityInfo = function(entity)
+    local playerCoords = GetEntityCoords(PlayerPedId())
+    local entityType   = GetEntityType(entity)
+    local entityHash   = GetEntityModel(entity)
+    local entityName   = (IsEntityAVehicle(entity) and GetDisplayNameFromVehicleModel(entityHash) or tostring(entityHash))
+    local entityData   = { '~y~' .. "Entity Information", '', "Model hash:" .. ' ~y~' .. entityHash, ' ', "Entity ID:" .. ' ~y~' .. entity, "Model name:" .. ' ~y~' .. entityName, "Network ID:" .. ' ~y~' .. (NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or 'Not networked'), "Owner:" .. ' ~y~' .. GetPlayerServerId(NetworkGetEntityOwner(entity)), ' ' }
+
+    if entityType == 1 then
+        local pedRelationshipGroup = GetPedRelationshipGroupHash(entity)
+        entityData[#entityData + 1] = "Health:" .. ' ~y~' .. GetEntityHealth(entity)
+        entityData[#entityData + 1] = "Max health:" .. ' ~y~' .. GetPedMaxHealth(entity)
+        entityData[#entityData + 1] = "Armour:" .. ' ~y~' .. GetPedArmour(entity)
+        entityData[#entityData + 1] = "Relationship group:" .. ' ~y~' .. (tostring(pedRelationshipGroup))
+        entityData[#entityData + 1] = "Relationship to player:" .. ' ~y~' .. GetPedRelationshipType(GetRelationshipBetweenPeds(entity, PlayerPedId()))
+    elseif entityType == 2 then
+        entityData[#entityData + 1] = "RPM:" .. ' ~y~' .. RoundFloat(GetVehicleCurrentRpm(entity), 2)
+        entityData[#entityData + 1] = (useKph and "Speed KPH:" or "Speed MPH:") .. ' ~y~' .. RoundFloat((GetEntitySpeed(entity) * (useKph and 3.6 or 2.23694)), 0)
+        entityData[#entityData + 1] = "Gear:" .. ' ~y~' .. GetVehicleCurrentGear(entity)
+        entityData[#entityData + 1] = "Acceleration:" .. ' ~y~' .. RoundFloat(GetVehicleAcceleration(entity), 2)
+        entityData[#entityData + 1] = "Body health:" .. ' ~y~' .. GetVehicleBodyHealth(entity)
+        entityData[#entityData + 1] = "Engine health:" .. ' ~y~' .. GetVehicleEngineHealth(entity)
+    elseif entityType == 3 then
+        entityData[#entityData + 1] = "Health:" .. ' ~y~' .. GetEntityHealth(entity)
     end
-    SetEntityAsMissionEntity(entity,true,true)
-    DeleteEntity(entity)
-    if DoesEntityExist(entity) then notify('Could not delete entity.','error') else notify('Entity deleted.','success') end
+    local entityCoords = GetEntityCoords(entity)
+
+    entityData[#entityData + 1] = ' '
+    entityData[#entityData + 1] = "Distance:" .. ' ~y~' .. RoundFloat(#(playerCoords - entityCoords), 2)
+    entityData[#entityData + 1] = "Heading:" .. ' ~y~' .. RoundFloat(GetEntityHeading(entity), 2)
+    entityData[#entityData + 1] = "Coords:" .. ' ~y~' .. RoundVector3(entityCoords, 2)
+    entityData[#entityData + 1] = "Rotation:" .. ' ~y~' .. RoundVector3(GetEntityRotation(entity), 2)
+    entityData[#entityData + 1] = "Velocity:" .. ' ~y~' .. RoundVector3(GetEntityVelocity(entity), 2)
+
+    return entityData
 end
-local function toggleFreeze(entity)
-    if entity==PlayerPedId() or (IsEntityAPed(entity) and IsPedAPlayer(entity)) then return notify('Cannot freeze players.','error') end
-    local nextState=not frozen[entity]
-    if NetworkGetEntityIsNetworked(entity) then
-        NetworkRequestControlOfEntity(entity)
-        local limit=GetGameTimer()+1000
-        while not NetworkHasControlOfEntity(entity) and GetGameTimer()<limit do Wait(0); NetworkRequestControlOfEntity(entity) end
-        if not NetworkHasControlOfEntity(entity) then return notify('No network control over entity.','error') end
-    end
-    FreezeEntityPosition(entity,nextState)
-    frozen[entity]=nextState
-    notify(nextState and 'Entity frozen.' or 'Entity unfrozen.','success')
-end
-local function showNearby()
-    local ped=PlayerPedId()
-    local origin=GetEntityCoords(ped)
-    local found={}
-    local function scan(first,nextFn,endFn,allowed)
-        local handle,entity=first()
-        if not handle or handle==-1 then return end
-        local ok=true
-        while ok do
-            if entity and entity~=0 and DoesEntityExist(entity) and allowed(entity) then
-                local coords=GetEntityCoords(entity)
-                if #(coords-origin)<=maxDistance then
-                    found[#found+1]={entity=entity,coords=coords}
-                end
-            end
-            ok,entity=nextFn(handle)
+
+local DrawEntityViewText = function(entity)
+    local data            = GetEntityInfo(entity)
+    local count           = #data
+
+    local posX            = FreeAimInfoBoxX
+    local posY            = FreeAimInfoBoxY
+    local titleSpacing    = 0.03
+    local textSpacing     = 0.022
+    local titeLeftMargin  = 0.05
+    local paddingTop      = 0.02
+    local paddingLeft     = 0.005
+    local rectWidth       = 0.18
+    local heightOfContent = (((count) * textSpacing) + titleSpacing) / count
+    local rectHeight      = ((count - 1) * heightOfContent) + paddingTop
+
+    DrawRect(posX + (rectWidth / 2), posY + ((rectHeight / 2) - posY / 2), rectWidth, rectHeight, 11, 11, 11, 200)
+
+    for k, v in ipairs(data) do
+        SetTextScale(0.35, 0.35)
+        SetTextFont(4)
+        SetTextDropshadow(1.0, 0, 0, 0, 255)
+        SetTextEdge(1, 0, 0, 0, 255)
+        SetTextColour(255, 255, 255, 215)
+        SetTextJustification(1)
+        BeginTextCommandDisplayText('STRING')
+        AddTextComponentSubstringPlayerName(v)
+        if k == 1 then
+            SetTextScale(0.50, 0.50)
+            EndTextCommandDisplayText(posX + titeLeftMargin, posY)
+            posY = posY + titleSpacing
+        else
+            SetTextScale(0.35, 0.35)
+            EndTextCommandDisplayText(posX + paddingLeft, posY)
+            posY = posY + textSpacing
         end
-        endFn(handle)
     end
-    if showObjects then scan(FindFirstObject,FindNextObject,EndFindObject,function() return true end) end
-    if showVehicles then scan(FindFirstVehicle,FindNextVehicle,EndFindVehicle,function() return true end) end
-    if showPeds then scan(FindFirstPed,FindNextPed,EndFindPed,function(entity) return entity~=ped and not IsPedAPlayer(entity) end) end
-    return found
 end
-CreateThread(function()
-    while true do
-        if enabled or showObjects or showVehicles or showPeds then
-            if enabled then
-                local hit,pos,entity=aimed()
-                label(0.35,0.015,'ENTITY VIEW | E Delete | G Freeze | H Copy coords')
-                local hasEntity=hit and entity and entity~=0 and DoesEntityExist(entity)
-                local color=hasEntity and {0,255,0,200} or {255,255,255,200}
-                local from=GetEntityCoords(PlayerPedId())
-                DrawLine(from.x,from.y,from.z,pos.x,pos.y,pos.z,color[1],color[2],color[3],color[4])
-                DrawMarker(28,pos.x,pos.y,pos.z,0,0,0,0,0,0,0.12,0.12,0.12,color[1],color[2],color[3],color[4],false,true,2,false,nil,nil,false)
-                if hasEntity then for i,line in ipairs(entityDetails(entity)) do label(0.35,0.035+i*0.022,line) end end
-                if IsControlJustReleased(0,74) and hit then copyCoords(pos) end
-                if hasEntity then
-                    if IsControlJustReleased(0,47) then toggleFreeze(entity) end
-                    if IsControlJustReleased(0,38) then deleteAimed(entity) end
+
+local DrawEntityViewTextInWorld = function(entity, coords)
+    local onScreen, posX, posY = World3dToScreen2d(coords.x, coords.y, coords.z)
+    if onScreen then
+        local data        = GetEntityInfo(entity)
+        local count       = #data
+        local textOffsetY = 0.015
+        local leftPadding = 0.005
+        local topPadding  = 0.01
+        local botPadding  = 0.02
+        local offSetCount = (((count - 2) * textOffsetY)) / count
+        local rectWidth   = 0.12
+        local rectHeight  = ((count) * offSetCount) + botPadding
+
+        DrawRect(posX, posY, rectWidth, rectHeight, 11, 11, 11, 200)
+
+        for k, v in ipairs(data) do
+            if k ~= 1 and k ~= 2 then
+                SetTextScale(0.25, 0.25)
+                SetTextFont(4)
+                SetTextDropshadow(1.0, 0, 0, 0, 255)
+                SetTextEdge(1, 0, 0, 0, 255)
+                SetTextColour(255, 255, 255, 215)
+                SetTextJustification(1)
+                BeginTextCommandDisplayText('STRING')
+                AddTextComponentSubstringPlayerName(v)
+                EndTextCommandDisplayText(posX - rectWidth / 2 + leftPadding, posY - rectHeight / 2 + topPadding)
+                posY = posY + textOffsetY
+            end
+        end
+    end
+end
+
+local GetVehicle = function(playerCoords)
+    local handle, vehicle = FindFirstVehicle()
+    if not handle or handle == -1 then return nil end
+    local success
+    local rveh = nil
+    repeat
+        if vehicle ~= FreeAimEntity then
+            local pos = GetEntityCoords(vehicle)
+            local distance = #(playerCoords - pos)
+            if distance < EntityViewDistance and distance > 5.0 then
+                DrawEntityBoundingBox(vehicle)
+            elseif distance < 5.0 then
+                rveh = vehicle
+                DrawEntityViewTextInWorld(vehicle, pos)
+            end
+        end
+        success, vehicle = FindNextVehicle(handle)
+    until not success
+    EndFindVehicle(handle)
+    return rveh
+end
+
+local GetObject = function(playerCoords)
+    local handle, object = FindFirstObject()
+    if not handle or handle == -1 then return nil end
+    local success
+    local robject = nil
+    repeat
+        if object ~= FreeAimEntity then
+            local pos = GetEntityCoords(object)
+            local distance = #(playerCoords - pos)
+            if distance < EntityViewDistance and distance > 5.0 then
+                DrawEntityBoundingBox(object)
+            elseif distance < 5.0 then
+                robject = object
+                DrawEntityViewTextInWorld(object, pos)
+            end
+        end
+        success, object = FindNextObject(handle)
+    until not success
+    EndFindObject(handle)
+    return robject
+end
+
+local GetNPC = function(playerCoords)
+    local handle, ped = FindFirstPed()
+    if not handle or handle == -1 then return nil end
+    local success
+    local rped = nil
+    repeat
+        if ped ~= FreeAimEntity then
+            local pos = GetEntityCoords(ped)
+            local distance = #(playerCoords - pos)
+            if CanEntityBeUsed(ped) then
+                if distance < EntityViewDistance and distance > 5.0 then
+                    DrawEntityBoundingBox(ped)
+                elseif distance < 5.0 then
+                    rped = ped
+                    DrawEntityViewTextInWorld(ped, pos)
                 end
             end
-            for _,item in ipairs(showNearby()) do
-                local screen,x,y=World3dToScreen2d(item.coords.x,item.coords.y,item.coords.z+0.5)
-                if screen then label(x,y,('Model %s | Entity %s'):format(GetEntityModel(item.entity),item.entity)) end
+        end
+        success, ped = FindNextPed(handle)
+    until not success
+    EndFindPed(handle)
+    return rped
+end
+
+ToggleEntityFreeView = function()
+    EntityFreeAim = not EntityFreeAim
+    if EntityFreeAim and not EntityViewEnabled then
+        RunEntityViewThread()
+    end
+end
+
+ToggleEntityObjectView = function()
+    EntityObjectView = not EntityObjectView
+    if EntityObjectView and not EntityViewEnabled then
+        RunEntityViewThread()
+    end
+end
+
+ToggleEntityVehicleView = function()
+    EntityVehicleView = not EntityVehicleView
+    if EntityVehicleView and not EntityViewEnabled then
+        RunEntityViewThread()
+    end
+end
+
+ToggleEntityPedView = function()
+    EntityPedView = not EntityPedView
+    if EntityPedView and not EntityViewEnabled then
+        RunEntityViewThread()
+    end
+end
+
+GetCurrentEntityViewDistance = function()
+    return EntityViewDistance / 5
+end
+
+SetEntityViewDistance = function(data)
+    EntityViewDistance = tonumber(data)
+end
+
+GetFreeAimEntity = function()
+    return FreeAimEntity
+end
+
+RunEntityViewThread = function()
+    EntityViewEnabled = true
+    Citizen.CreateThread(function()
+        while EntityViewEnabled do
+            Citizen.Wait(0)
+            local playerPed    = PlayerPedId()
+            local playerCoords = GetEntityCoords(playerPed)
+
+            if EntityPedView then
+                GetNPC(playerCoords)
             end
-            Wait(0)
-        else Wait(250) end
-    end
-end)
+
+            if EntityObjectView then
+                GetObject(playerCoords)
+            end
+
+            if EntityVehicleView then
+                GetVehicle(playerCoords)
+            end
+
+            if EntityFreeAim then
+                DrawTitle('~y~' .. "Entity Viewer" .. '~w~\n[~y~E~w~] - ' .. "Delete" .. ' ~w~[~y~G~w~] - ' .. "Freeze" .. ' ~w~[~y~H~w~] - ' .. "Copy coordinates")
+                local color = { r = 255, g = 255, b = 255, a = 200 }
+                local position = GetEntityCoords(playerPed)
+                local hit, coords, entity = RayCastGamePlayCamera(1000.0)
+                -- If entity is found then verify entity
+                if IsControlJustReleased(0, 74) then -- Copy Coords
+                    local x = PMRound(coords.x, 2)
+                    local y = PMRound(coords.y, 2)
+                    local z = PMRound(coords.z, 2)
+                    lib.setClipboard(string.format('vector3(%s, %s, %s)', x, y, z))
+                    PMNotify("Coordinates copied", 'success')
+                end
+                if hit and (IsEntityAVehicle(entity) or IsEntityAPed(entity) or IsEntityAnObject(entity)) then
+                    color = { r = 0, g = 255, b = 0, a = 200 }
+                    FreeAimEntity = entity
+                    DrawEntityBoundingBox(entity, color)
+                    DrawEntityViewText(entity)
+
+                    if IsControlJustReleased(0, 47) then -- Freeze entities
+                        if FrozenEntities[entity] then
+                            FrozenEntities[entity] = not FrozenEntities[entity]
+                        else
+                            FrozenEntities[entity] = true
+                        end
+
+                        FreezeEntityPosition(entity, FrozenEntities[entity])
+                        PMNotify("you_have" .. (FrozenEntities[entity] and "Entity frozen" or "Entity unfrozen") .. "freeaim_entity", (FrozenEntities[entity] and 'success' or 'error'))
+                    end
+
+                    if IsControlJustReleased(0, 38) then -- Delete entity
+                        -- Set as missionEntity so the object can be remove (Even map objects)
+                        SetEntityAsMissionEntity(entity, true, true)
+                        DeleteEntity(entity)
+
+                        if not DoesEntityExist(entity) then
+                            PMNotify("Entity deleted", 'success')
+                        else
+                            PMNotify("Could not delete entity", 'error')
+                        end
+                    end
+                else
+                    FreeAimEntity = nil
+                end
+
+                DrawLine(position.x, position.y, position.z, coords.x, coords.y, coords.z, color.r, color.g, color.b, color.a)
+                DrawMarker(28, coords.x, coords.y, coords.z, 0.0, 0.0, 0.0, 0.0, 180.0, 0.0, 0.1, 0.1, 0.1, color.r, color.g, color.b, color.a, false, true, 2, nil, nil, false, false)
+            end
+
+            if EntityPedView == false and EntityObjectView == false and EntityVehicleView == false and EntityFreeAim == false then
+                EntityViewEnabled = false
+            end
+        end
+    end)
+end
+
+-- PM DevCoords ox_lib integration; the rendering and original E/G/H behavior above
+-- are retained from qb-adminmenu's entity_view.lua.
+local function CopyFullEntity()
+    local entity=GetFreeAimEntity()
+    if not entity or entity==0 or not DoesEntityExist(entity) then PMNotify('Aim at an entity first','error');return end
+    local hash=GetEntityModel(entity)
+    local name=IsEntityAVehicle(entity) and GetDisplayNameFromVehicleModel(hash) or tostring(hash)
+    local c=GetEntityCoords(entity)
+    local r=GetEntityRotation(entity)
+    lib.setClipboard(('Model Name:\\t%s\\nModel Hash:\\t%s\\n\\nHeading:\\t%.2f\\nCoords:\\t\\tvector3(%.2f, %.2f, %.2f)\\nRotation:\\tvector3(%.2f, %.2f, %.2f)'):format(name,hash,GetEntityHeading(entity),c.x,c.y,c.z,r.x,r.y,r.z))
+    PMNotify('Full entity information copied','success')
+end
+RegisterNetEvent('pm-devcoords:devadmin:copyEntity',CopyFullEntity)
 RegisterNetEvent('pm-devcoords:devadmin:entityview',function(action)
-    if action=='aim' then enabled=not enabled
-    elseif action=='objects' then showObjects=not showObjects
-    elseif action=='vehicles' then showVehicles=not showVehicles
-    elseif action=='peds' then showPeds=not showPeds
+    if action=='aim' then ToggleEntityFreeView()
+    elseif action=='objects' then ToggleEntityObjectView()
+    elseif action=='vehicles' then ToggleEntityVehicleView()
+    elseif action=='peds' then ToggleEntityPedView()
     elseif action=='distance' then
-        local input=lib.inputDialog('Entity view distance',{{type='number',label='Distance in meters',default=maxDistance,min=1,max=100,required=true}})
-        if input then maxDistance=input[1] end
+        local response=lib.inputDialog('Entity viewer distance',{{type='slider',label='Distance (meters)',min=5,max=50,step=5,default=EntityViewDistance}})
+        if response and response[1] then SetEntityViewDistance(response[1]) end
     end
-    notify('Entity viewer settings updated.')
-end)
-AddEventHandler('onResourceStop',function(name)
-    if name==GetCurrentResourceName() then enabled=false; showObjects=false; showVehicles=false; showPeds=false end
 end)
