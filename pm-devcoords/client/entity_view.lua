@@ -84,7 +84,7 @@ end
 local DrawEntityBoundingBox = function(entity, color)
     if not entity or entity == 0 or not DoesEntityExist(entity) then return end
     local minimum, maximum = GetModelDimensions(GetEntityModel(entity))
-    local right, forward, up, position = GetEntityMatrix(entity)
+    local forward, right, up, position = GetEntityMatrix(entity)
     if not minimum or not maximum then return end
     color = color or {r=255,g=255,b=255,a=255}
     local corners = {}
