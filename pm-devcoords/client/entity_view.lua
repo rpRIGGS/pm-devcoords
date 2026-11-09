@@ -22,12 +22,49 @@ local function copyCoords(pos)
     lib.setClipboard(('vector3(%.3f, %.3f, %.3f)'):format(pos.x,pos.y,pos.z))
     notify('Aimed coordinates copied to clipboard.','success')
 end
-local function entityDetails(entity)
-    local coords=GetEntityCoords(entity)
-    local typ=GetEntityType(entity)
-    local net=NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or 'local'
-    return ('Type: %s | Model hash: %s | Entity: %s | Net: %s | Heading: %.2f | %.2f, %.2f, %.2f'):format(typ,GetEntityModel(entity),entity,tostring(net),GetEntityHeading(entity),coords.x,coords.y,coords.z)
+local function entityName(entity)
+    local hash = GetEntityModel(entity)
+    if IsEntityAVehicle(entity) then return GetDisplayNameFromVehicleModel(hash) end
+    return tostring(hash)
 end
+local function entityDetails(entity)
+    local c=GetEntityCoords(entity)
+    local r=GetEntityRotation(entity,2)
+    local v=GetEntityVelocity(entity)
+    local kind=GetEntityType(entity)
+    local networked=NetworkGetEntityIsNetworked(entity)
+    local net=networked and tostring(NetworkGetNetworkIdFromEntity(entity)) or 'not networked'
+    local owner=networked and tostring(GetPlayerServerId(NetworkGetEntityOwner(entity))) or 'local'
+    local lines={
+        ('Model: %s | Hash: %s'):format(entityName(entity),GetEntityModel(entity)),
+        ('Type: %s | Entity: %s | Net ID: %s | Owner: %s'):format(kind,entity,net,owner),
+        ('Distance: %.2f | Heading: %.2f'):format(#(GetEntityCoords(PlayerPedId())-c),GetEntityHeading(entity)),
+        ('Coords: vector3(%.2f, %.2f, %.2f)'):format(c.x,c.y,c.z),
+        ('Rotation: vector3(%.2f, %.2f, %.2f)'):format(r.x,r.y,r.z),
+        ('Velocity: vector3(%.2f, %.2f, %.2f)'):format(v.x,v.y,v.z)
+    }
+    if kind==1 then
+        lines[#lines+1]=('Health: %s | Max health: %s | Armour: %s'):format(GetEntityHealth(entity),GetPedMaxHealth(entity),GetPedArmour(entity))
+        lines[#lines+1]=('Relationship group: %s | Relationship to player: %s'):format(GetPedRelationshipGroupHash(entity),GetRelationshipBetweenPeds(entity,PlayerPedId()))
+    elseif kind==2 then
+        lines[#lines+1]=('RPM: %.2f | Speed MPH: %.0f | Gear: %s'):format(GetVehicleCurrentRpm(entity),GetEntitySpeed(entity)*2.23694,GetVehicleCurrentGear(entity))
+        lines[#lines+1]=('Acceleration: %.2f | Engine: %.1f | Body: %.1f'):format(GetVehicleAcceleration(entity),GetVehicleEngineHealth(entity),GetVehicleBodyHealth(entity))
+    elseif kind==3 then
+        lines[#lines+1]=('Health: %s'):format(GetEntityHealth(entity))
+    end
+    return lines
+end
+local function copyEntityInfo(entity)
+    local c=GetEntityCoords(entity)
+    local r=GetEntityRotation(entity,2)
+    lib.setClipboard(('Model Name:\\t%s\\nModel Hash:\\t%s\\n\\nHeading:\\t%.2f\\nCoords:\\t\\tvector3(%.2f, %.2f, %.2f)\\nRotation:\\tvector3(%.2f, %.2f, %.2f)'):format(entityName(entity),GetEntityModel(entity),GetEntityHeading(entity),c.x,c.y,c.z,r.x,r.y,r.z))
+    notify('Full entity information copied.','success')
+end
+RegisterNetEvent('pm-devcoords:devadmin:copyEntity',function()
+    local hit,_,entity=aimed()
+    if not hit or not entity or entity==0 or not DoesEntityExist(entity) then return notify('Aim at an entity first.','error') end
+    copyEntityInfo(entity)
+end)
 local function deleteAimed(entity)
     if entity==PlayerPedId() or (IsEntityAPed(entity) and IsPedAPlayer(entity)) then return notify('Cannot delete players.','error') end
     if NetworkGetEntityIsNetworked(entity) then
@@ -88,7 +125,7 @@ CreateThread(function()
                 local from=GetEntityCoords(PlayerPedId())
                 DrawLine(from.x,from.y,from.z,pos.x,pos.y,pos.z,color[1],color[2],color[3],color[4])
                 DrawMarker(28,pos.x,pos.y,pos.z,0,0,0,0,0,0,0.12,0.12,0.12,color[1],color[2],color[3],color[4],false,true,2,false,nil,nil,false)
-                if hasEntity then label(0.35,0.05,entityDetails(entity)) end
+                if hasEntity then for i,line in ipairs(entityDetails(entity)) do label(0.35,0.035+i*0.022,line) end end
                 if IsControlJustReleased(0,74) and hit then copyCoords(pos) end
                 if hasEntity then
                     if IsControlJustReleased(0,47) then toggleFreeze(entity) end
