@@ -99,12 +99,12 @@ commands.devcoords_capture()
 assert(serverEvents[#serverEvents].name=='pm-devcoords:export')
 events['pm-devcoords:toggle']()
 hit=true
-now=1100
+now=1200
 ok,err=pcall(threads[#threads])
 assert(not ok and tostring(err):find('TEST_YIELD'))
 assert(messages[#messages].vector3=='vector3(10.000, 20.000, 30.000)', 'boolean raycast hit was not recognized')
 hit=0
-now=1200
+now=1400
 ok,err=pcall(threads[#threads])
 assert(not ok and tostring(err):find('TEST_YIELD'))
 commands.devcoords_capture()
