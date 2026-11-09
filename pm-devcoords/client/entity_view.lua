@@ -65,7 +65,8 @@ local RayCastGamePlayCamera = function(distance)
     -- Checks to see if the Gameplay Cam is Rendering or another is rendering (no clip functionality)
     local currentRenderingCam = false
     if not IsGameplayCamRendering() then
-        currentRenderingCam = GetRenderingCam()
+        local cam = GetRenderingCam()
+        if cam and cam ~= 0 and DoesCamExist(cam) then currentRenderingCam = cam end
     end
 
     local cameraRotation = not currentRenderingCam and GetGameplayCamRot() or GetCamRot(currentRenderingCam, 2)
