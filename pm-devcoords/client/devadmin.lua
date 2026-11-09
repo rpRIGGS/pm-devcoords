@@ -191,9 +191,13 @@ local function open()
         {title='Copy vector4',onSelect=function() ExecuteCommand('vector4') end},
         {title='Copy heading',onSelect=function() ExecuteCommand('heading') end},
         {title='Toggle live coordinates',onSelect=function() ExecuteCommand('coords') end},
-        {title='Toggle NoClip',description='WASD move, Space up, Ctrl down, Shift faster',onSelect=toggleNoClip},
+
         {title='Toggle vehicle developer HUD',onSelect=function() showVehicleInfo=not showVehicleInfo end},
-        {title='Toggle aimed entity information',onSelect=function() showEntityInfo=not showEntityInfo end},
+        {title='Entity viewer: free aim (E/G/H)',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','aim') end},
+        {title='Entity viewer: nearby objects',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','objects') end},
+        {title='Entity viewer: nearby vehicles',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','vehicles') end},
+        {title='Entity viewer: nearby peds',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','peds') end},
+        {title='Entity viewer: distance',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','distance') end},
         {title='Copy aimed entity model',onSelect=function()
             local aiming,entity=GetEntityPlayerIsFreeAimingAt(PlayerId())
             if not aiming or entity==0 then return notify('Aim at an entity first.','error') end
@@ -201,7 +205,7 @@ local function open()
             notify('Entity model copied.','success')
         end},
         {title='Spawn vehicle',onSelect=spawnVehicle},
-        {title='Repair vehicle',onSelect=repair},
+
         {title='Delete vehicle',onSelect=deleteVehicle},
         {title='Max vehicle upgrades',onSelect=maxVehicle},
         {title='Save vehicle (/admincar)',description='Add your current QBCore vehicle to player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
