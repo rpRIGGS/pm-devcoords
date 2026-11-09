@@ -1,11 +1,11 @@
 fx_version 'cerulean'
 game 'gta5'
 author 'LuckyyFishyy / PowerMoves RP'
-description 'PowerMoves RP developer coordinate capture'
-version '1.1.0'
-dependency 'ox_lib'
+description 'PowerMoves RP developer coordinate capture and administration utilities'
+version '1.2.0'
+dependencies { 'qb-core', 'ox_lib', 'oxmysql' }
 ui_page 'html/index.html'
 shared_scripts { '@ox_lib/init.lua', 'shared/config.lua' }
-client_scripts { 'client/main.lua' }
-server_scripts { 'server/main.lua' }
+client_scripts { 'client/main.lua', 'client/devadmin.lua' }
+server_scripts { '@oxmysql/lib/MySQL.lua', 'server/main.lua', 'server/devadmin.lua' }
 files { 'html/index.html', 'html/style.css', 'html/script.js' }
