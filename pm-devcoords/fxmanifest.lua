@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 author 'LuckyyFishyy / PowerMoves RP'
-description 'PowerMoves RP developer coordinate capture and administration utilities'
+description 'PM DevCoords - unified QBCore developer toolkit with coordinate capture, entity inspection and vehicle utilities'
 version '1.2.0'
 dependencies { 'qb-core', 'ox_lib', 'oxmysql' }
 ui_page 'html/index.html'
