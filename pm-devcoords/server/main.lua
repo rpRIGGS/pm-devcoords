@@ -1,9 +1,10 @@
+local QBCore = exports['qb-core']:GetCoreObject()
 local resource = GetCurrentResourceName()
 local storage = 'captures.json'
 local groups = {}
 
 local function allowed(src)
-    return src > 0 and IsPlayerAceAllowed(src, 'command.devcoords')
+    return src > 0 and (QBCore.Functions.HasPermission(src, 'admin') or QBCore.Functions.HasPermission(src, 'god'))
 end
 
 local function notify(src, message, kind)
