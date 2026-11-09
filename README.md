@@ -9,7 +9,7 @@ Aim at a world surface (a successful raycast hit is required to save), capture `
 1. Copy the **inner `pm-devcoords/` folder** (the one containing `fxmanifest.lua`) into your server resources directory. Do not install the entire GitHub repository as the resource.
 2. Install and start `qb-core`, `ox_lib`, and `oxmysql` before this resource.
 3. Add `ensure pm-devcoords` after those dependencies in `server.cfg`.
-4. Grant your existing administrator group the ACE `command.devcoords`, for example `add_ace group.admin command.devcoords allow`. This does not require player identifiers in the script.
+4. No new ACE permission is required. Access uses your existing QBCore `admin` or `god` permissions.
 
 ## Use
 
@@ -53,6 +53,6 @@ Use **/devadmin** to open the unified ox_lib developer menu. The original qb-adm
 
 **Excluded intentionally:** vehicle spawning, /repair, /dv, NoClip, god mode, high jump and running-speed changes, which are already provided by Legend or txAdmin. There is no reason to duplicate those features. The original qb-adminmenu vehicle category browser belongs to its vehicle spawner and is likewise excluded.
 
-**Permissions:** All PM DevCoords features use the same server-side ACE permission, `command.devcoords`. Grant it to your existing administrator principal using `add_ace group.admin command.devcoords allow` (or the appropriate ACE group for your server). QBCore admin/god alone does not bypass this resource's ACE check.
+**Permissions:** All PM DevCoords features use QBCore's existing `admin` or `god` permission checks. No custom `command.devcoords` ACE grant is needed.
 
 **Validation:** GitHub Actions checks Lua syntax and the repository's automated tests. Live FiveM verification remains required for client natives, entity controls, clipboard, /admincar database writes, and coexistence with Legend/txAdmin. A passing CI run is not a claim of successful in-game testing.
