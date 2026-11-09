@@ -13,7 +13,7 @@ This is **one resource**, not two admin scripts. Coordinate capture remains a fe
 
 ## Main menu and commands
 
-Run `/devadmin` to open the unified developer menu.
+Run `/devadmin` to open the unified developer menu. The main screen has four categories: **Coordinates**, **Entities**, **Vehicles**, and **Utilities**. Each opens a focused ox_lib submenu with back navigation.
 
 - `/devadmin`: open the unified PM DevCoords developer menu.
 - **Coordinate collector** in the main menu: start or stop the pointer capture overlay and open its collection menu.
