@@ -458,6 +458,10 @@ end
 -- are retained from qb-adminmenu's entity_view.lua.
 local function CopyFullEntity()
     local entity=GetFreeAimEntity()
+    if not entity or entity==0 or not DoesEntityExist(entity) then
+        local hit,_,target=RayCastGamePlayCamera(1000.0)
+        if hit and target and target~=0 and DoesEntityExist(target) then entity=target end
+    end
     if not entity or entity==0 or not DoesEntityExist(entity) then PMNotify('Aim at an entity first','error');return end
     local hash=GetEntityModel(entity)
     local name=IsEntityAVehicle(entity) and GetDisplayNameFromVehicleModel(hash) or tostring(hash)
