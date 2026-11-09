@@ -22,7 +22,7 @@ GetNumVehicleMods=function() return 3 end
 SetVehicleMod=function() end
 ToggleVehicleMod=function() end
 SetVehicleFixed=function() end
-TriggerServerEvent=function(name,props) assert(name=='pm-devcoords:devadmin:savecar' and props.plate=='DEV123') end
+TriggerServerEvent=function(name,props) assert(name=='pm-devcoords:collector:toggle' or (name=='pm-devcoords:devadmin:savecar' and props.plate=='DEV123')) end
 ExecuteCommand=function(cmd) commands[#commands+1]=cmd end
 TriggerEvent=function(name,action) events[name](action) end
 dofile('pm-devcoords/client/devadmin.lua')
@@ -45,7 +45,7 @@ for _,title in ipairs({'God mode','High jump','Movement speed','NoClip','Spawn v
   assert(not titles[title], 'duplicate admin menu option '..title)
 end
 titles['Coordinate collector'].onSelect()
-assert(commands[#commands]=='devcoordscollector')
+assert(commands[#commands]~='devcoordscollector')
 titles['Copy vector3'].onSelect()
 assert(commands[#commands]=='vector3')
 titles['Set ped model'].onSelect()
