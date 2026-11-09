@@ -1,6 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local function permitted(src)
-    return src > 0 and (IsPlayerAceAllowed(src, 'command.devcoords') or QBCore.Functions.HasPermission(src, 'admin') or QBCore.Functions.HasPermission(src, 'god'))
+    return src > 0 and IsPlayerAceAllowed(src, 'command.devcoords')
 end
 local function tell(src, message, kind)
     TriggerClientEvent('pm-devcoords:notify', src, message, kind or 'inform')
