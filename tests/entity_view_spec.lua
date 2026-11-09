@@ -23,6 +23,9 @@ GetEntityModel=function() return 123 end
 GetDisplayNameFromVehicleModel=function() return 'TESTCAR' end
 local networked, control, requests = false, true, 0
 NetworkGetEntityIsNetworked=function() return networked end
+NetworkGetNetworkIdFromEntity=function() return 12 end
+NetworkGetEntityOwner=function() return 1 end
+GetPlayerServerId=function() return 1 end
 NetworkHasControlOfEntity=function() return control end
 NetworkRequestControlOfEntity=function() requests=requests+1 end
 GetEntityCoords=function(id) return id==1 and v(0,0,0) or v(1,2,3) end
