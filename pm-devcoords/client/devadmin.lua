@@ -102,7 +102,7 @@ RegisterNetEvent('pm-devcoords:devadmin:setmodel',function(name)
 end)
 local function open()
     local options={
-        {title='Coordinate collector',description='Open the existing pointer and group capture tool',onSelect=function() ExecuteCommand('devcoords') end},
+        {title='Coordinate collector',description='Open the existing pointer and group capture tool',onSelect=function() ExecuteCommand('devcoordscollector') end},
         {title='Copy vector2',onSelect=function() ExecuteCommand('vector2') end},
         {title='Copy vector3',onSelect=function() ExecuteCommand('vector3') end},
         {title='Copy vector4',onSelect=function() ExecuteCommand('vector4') end},
@@ -125,7 +125,7 @@ local function open()
         end},
 
     }
-    lib.registerContext({id='pm_devcoords_devadmin',title='PowerMoves Developer Tools',options=options})
+    lib.registerContext({id='pm_devcoords_devadmin',title='PM DevCoords — Developer Tools',options=options})
     lib.showContext('pm_devcoords_devadmin')
 end
 RegisterNetEvent('pm-devcoords:devadmin:open',open)
