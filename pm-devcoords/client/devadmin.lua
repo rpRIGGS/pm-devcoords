@@ -102,7 +102,7 @@ RegisterNetEvent('pm-devcoords:devadmin:setmodel',function(name)
 end)
 local function open()
     local options={
-        {title='Coordinate collector',description='Open the existing pointer and group capture tool',onSelect=function() ExecuteCommand('devcoordscollector') end},
+        {title='Coordinate collector',description='Open the existing pointer and group capture tool',onSelect=function() TriggerServerEvent('pm-devcoords:collector:toggle') end},
         {title='Copy vector2',onSelect=function() ExecuteCommand('vector2') end},
         {title='Copy vector3',onSelect=function() ExecuteCommand('vector3') end},
         {title='Copy vector4',onSelect=function() ExecuteCommand('vector4') end},
