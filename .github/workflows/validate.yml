@@ -19,5 +19,7 @@ jobs:
         run: lua5.4 tests/devadmin_spec.lua
       - name: Test client logic with FiveM and ox_lib mocks
         run: lua5.4 tests/client_spec.lua
+      - name: Test developer ox_lib client menu and events
+        run: lua5.4 tests/devadmin_client_spec.lua
       - name: Test HTML overlay
         run: node tests/nui_spec.js
