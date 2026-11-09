@@ -26,7 +26,7 @@ local function emit(src, name, ...)
 end
 dofile('pm-devcoords/server/main.lua')
 assert(commands.devcoords)
-commands.devcoords(2)
+commands.devcoordscollector(2)
 assert(notices[#notices].args[1] == 'Administrator permission required.')
 emit(2, 'pm-devcoords:create', 'Blocked', 'Row')
 assert(not files['captures.json'])
