@@ -44,9 +44,9 @@ The `.txt` file contains readable named Lua-style `vector3(...)` / `vector4(...)
 
 ## Developer tools ported from qb-adminmenu
 
-Use **/devadmin** to open the ox_lib developer menu. The original qb-adminmenu developer tools are integrated into this single PM DevCoords resource, alongside the original pointer-based coordinate collector.
+Use **/devcoords** or its alias **/devadmin** to open the same ox_lib developer menu. The original qb-adminmenu developer tools are integrated into this single PM DevCoords resource, alongside the original pointer-based coordinate collector.
 
-- **Coordinates:** /vector2, /vector3, /vector4, /heading, /coords; two-decimal clipboard output and live vector4 HUD. The pointer collector retains /devcoords, /devcoordsmenu, J capture, K undo, group/row/side selection and .txt export.
+- **Coordinates:** /vector2, /vector3, /vector4, /heading, /coords; two-decimal clipboard output and live vector4 HUD. The pointer collector is launched from the unified menu and retains /devcoordsmenu, J capture, K undo, group/row/side selection and .txt export.
 - **Vehicles:** /maxmods applies the original performance slots (11, 12, 13, 15, 16, turbo); /admincar saves the driven vehicle's properties into QBCore player_vehicles after server-side driver, model and plate validation. Vehicle developer HUD displays entity ID, net ID, model name/hash, engine and body health.
 - **Entity viewer:** original qb-adminmenu raycast, detailed aimed entity panel, 3D bounding boxes, nearby objects/vehicles/peds, 5–50m radius, E delete, G freeze/unfreeze, H copy pointed vector3, and full entity information clipboard output. The viewer supports an independently toggled free-aim mode.
 - **Additional developer commands:** `/setmodel <model> [player id]` changes a ped model (including an online player ID when specified). Waypoint teleport is available from the ox_lib menu.
