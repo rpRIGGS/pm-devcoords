@@ -43,10 +43,16 @@ The `.txt` file contains readable named Lua-style `vector3(...)` / `vector4(...)
 
 ## Developer utilities restored from qb-adminmenu
 
-Use **`/devadmin`** for an ox_lib development menu. It provides: existing pointer/group coordinate collector, copy player `vector2`, `vector3`, `vector4`, heading to clipboard, live coordinate HUD, NoClip (WASD/Space/Ctrl; Shift for faster movement), vehicle spawn by model, repair, delete, max upgrades, vehicle developer HUD, aimed-entity information and model copy, waypoint teleport, and save current vehicle to your player garage database.
+Use **`/devadmin`** for an ox_lib development menu. It provides: existing pointer/group coordinate collector, copy player `vector2`, `vector3`, `vector4`, heading to clipboard, live coordinate HUD, vehicle spawn by model, delete, max upgrades, vehicle developer HUD, full entity free-aim inspection (E delete, G freeze/unfreeze, H copy aimed coordinates), nearby object/vehicle/ped information, entity model copy, waypoint teleport, and save current vehicle to your player garage database.
 
 Restored slash commands: **`/vector2`**, **`/vector3`**, **`/vector4`**, **`/heading`**, **`/coords`**, **`/admincar`**, and **`/devadmin`**. Existing **`/devcoords`** and **`/devcoordsmenu`** remain unchanged. The vector commands copy your **player's** location; the pointer collector captures the aimed world position. `/admincar` requires you to be driving a model listed in `QBCore.Shared.Vehicles`; the vehicle plate must not already be in `player_vehicles`. Vehicle spawning is temporary; `/admincar` registers it in the QBCore vehicle database.
 
 Access: ACE `command.devcoords` **or** QBCore `admin`/`god` permissions. The existing coordinate collector retains its original ACE requirement, so grant `command.devcoords` to admins who need that collector. This resource does not replace Legend's server/player administration features.
 
 **Status:** automated checks are not a substitute for testing the development menu and QBCore garage schema in a live FiveM server. The NoClip and vehicle utilities should be verified in-game before relying on them.
+
+### Original qb-adminmenu entity-view controls
+
+Open `/devadmin` → **Entity viewer: free aim (E/G/H)**. Aim at an object, vehicle, or NPC to see its model hash, entity ID, network ID, heading, and position. **E** deletes the targeted entity, **G** freezes/unfreezes it, and **H** copies the aimed world coordinates as `vector3(...)` to the clipboard. The nearby-object, vehicle, and ped views can be toggled independently; their inspection radius is adjustable. Avoid deleting map/world objects you need; deletion is not undoable. These are client-side developer utilities, not replacements for server-wide persistent world editing.
+
+Legend already supplies repair and NoClip, so the new `/devadmin` menu does not duplicate those entries. The prior internal NoClip/repair helper code is not exposed in the menu.
