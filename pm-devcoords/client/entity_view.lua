@@ -425,7 +425,7 @@ RunEntityViewThread = function()
                         end
 
                         FreezeEntityPosition(entity, FrozenEntities[entity])
-                        PMNotify("you_have" .. (FrozenEntities[entity] and "Entity frozen" or "Entity unfrozen") .. "freeaim_entity", (FrozenEntities[entity] and 'success' or 'error'))
+                        PMNotify(FrozenEntities[entity] and 'Entity frozen' or 'Entity unfrozen', 'success')
                     end
 
                     if IsControlJustReleased(0, 38) then -- Delete entity
