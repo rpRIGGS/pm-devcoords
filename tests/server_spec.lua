@@ -25,7 +25,7 @@ local function emit(src, name, ...)
     assert(events[name], 'missing event ' .. name)(...)
 end
 dofile('pm-devcoords/server/main.lua')
-assert(commands.devcoords)
+assert(commands.devcoordscollector)
 commands.devcoordscollector(2)
 assert(notices[#notices].args[1] == 'Administrator permission required.')
 emit(2, 'pm-devcoords:create', 'Blocked', 'Row')
