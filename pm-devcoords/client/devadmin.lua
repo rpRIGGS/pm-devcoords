@@ -138,7 +138,6 @@ local function toggleNoClip()
     end
     notify('NoClip '..(noclip and 'enabled' or 'disabled'))
 end
-RegisterCommand('pmdev_noclip', toggleNoClip, false)
 CreateThread(function()
     while true do
         if noclip and noclipEntity and DoesEntityExist(noclipEntity) then
