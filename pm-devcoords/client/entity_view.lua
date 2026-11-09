@@ -463,7 +463,14 @@ local function CopyFullEntity()
     local name=IsEntityAVehicle(entity) and GetDisplayNameFromVehicleModel(hash) or tostring(hash)
     local c=GetEntityCoords(entity)
     local r=GetEntityRotation(entity)
-    lib.setClipboard(('Model Name:\\t%s\\nModel Hash:\\t%s\\n\\nHeading:\\t%.2f\\nCoords:\\t\\tvector3(%.2f, %.2f, %.2f)\\nRotation:\\tvector3(%.2f, %.2f, %.2f)'):format(name,hash,GetEntityHeading(entity),c.x,c.y,c.z,r.x,r.y,r.z))
+    lib.setClipboard(table.concat({
+        ('Model Name: %s'):format(name),
+        ('Model Hash: %s'):format(hash),
+        '',
+        ('Heading: %.2f'):format(GetEntityHeading(entity)),
+        ('Coords: vector3(%.2f, %.2f, %.2f)'):format(c.x,c.y,c.z),
+        ('Rotation: vector3(%.2f, %.2f, %.2f)'):format(r.x,r.y,r.z)
+    }, string.char(10)))
     PMNotify('Full entity information copied','success')
 end
 RegisterNetEvent('pm-devcoords:devadmin:copyEntity',CopyFullEntity)
