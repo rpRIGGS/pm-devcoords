@@ -1,5 +1,14 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local showCoords = false
+local showVehicleInfo = false
+local showEntityInfo = false
+local noclip = false
+local noclipEntity = nil
+local noclipSpeed = 1.5
+local function drawLabel(x,y,value)
+    SetTextFont(4); SetTextScale(0.35,0.35); SetTextColour(255,255,255,255)
+    SetTextOutline(); SetTextEntry('STRING'); AddTextComponentString(value); DrawText(x,y)
+end
 local function notify(message, kind)
     lib.notify({title='PM DevCoords', description=message, type=kind or 'inform'})
 end
@@ -31,10 +40,7 @@ CreateThread(function()
         if showCoords then
             local c = GetEntityCoords(PlayerPedId())
             local h = GetEntityHeading(PlayerPedId())
-            SetTextFont(4); SetTextScale(0.35,0.35); SetTextColour(255,255,255,255)
-            SetTextOutline(); SetTextEntry('STRING')
-            AddTextComponentString(('X %.3f | Y %.3f | Z %.3f | H %.2f'):format(c.x,c.y,c.z,h))
-            DrawText(0.015,0.78)
+            drawLabel(0.015,0.78,('X %.3f | Y %.3f | Z %.3f | H %.2f'):format(c.x,c.y,c.z,h))
             Wait(0)
         else Wait(400) end
     end
@@ -112,6 +118,72 @@ local function waypoint()
     SetEntityCoordsNoOffset(entity,c.x,c.y,1000.0,false,false,false)
     notify('Ground height unavailable; teleported above waypoint.','error')
 end
+local function toggleNoClip()
+    local ped = PlayerPedId()
+    noclip = not noclip
+    if noclip then
+        noclipEntity = GetVehiclePedIsIn(ped,false)
+        if noclipEntity == 0 then noclipEntity = ped end
+        FreezeEntityPosition(noclipEntity,true)
+        SetEntityCollision(noclipEntity,false,false)
+        SetEntityInvincible(noclipEntity,true)
+    else
+        local entity = noclipEntity
+        if entity and DoesEntityExist(entity) then
+            FreezeEntityPosition(entity,false)
+            SetEntityCollision(entity,true,true)
+            SetEntityInvincible(entity,false)
+        end
+        noclipEntity = nil
+    end
+    notify('NoClip '..(noclip and 'enabled' or 'disabled'))
+end
+RegisterCommand('pmdev_noclip', toggleNoClip, false)
+CreateThread(function()
+    while true do
+        if noclip and noclipEntity and DoesEntityExist(noclipEntity) then
+            local entity=noclipEntity
+            local rot=GetGameplayCamRot(2)
+            local pitch=math.rad(rot.x)
+            local yaw=math.rad(rot.z)
+            local forward=vector3(-math.sin(yaw)*math.cos(pitch),math.cos(yaw)*math.cos(pitch),math.sin(pitch))
+            local right=vector3(math.cos(yaw),math.sin(yaw),0.0)
+            local delta=vector3(0.0,0.0,0.0)
+            if IsControlPressed(0,32) then delta=delta+forward end
+            if IsControlPressed(0,33) then delta=delta-forward end
+            if IsControlPressed(0,35) then delta=delta+right end
+            if IsControlPressed(0,34) then delta=delta-right end
+            if IsControlPressed(0,22) then delta=delta+vector3(0,0,1) end
+            if IsControlPressed(0,36) then delta=delta-vector3(0,0,1) end
+            local speed=noclipSpeed*(IsControlPressed(0,21) and 4.0 or 1.0)
+            local coords=GetEntityCoords(entity)
+            SetEntityCoordsNoOffset(entity,coords.x+delta.x*speed,coords.y+delta.y*speed,coords.z+delta.z*speed,false,false,false)
+            SetEntityHeading(entity,(-rot.z)%360.0)
+            Wait(0)
+        else Wait(300) end
+    end
+end)
+CreateThread(function()
+    while true do
+        if showVehicleInfo or showEntityInfo then
+            if showVehicleInfo then
+                local car=vehicle()
+                if car then
+                    local c=GetEntityCoords(car)
+                    drawLabel(0.015,0.82,('VEHICLE model %s | plate %s | net %s | %.2f %.2f %.2f'):format(GetEntityModel(car),GetVehicleNumberPlateText(car),NetworkGetNetworkIdFromEntity(car),c.x,c.y,c.z))
+                else drawLabel(0.015,0.82,'VEHICLE: none nearby') end
+            end
+            if showEntityInfo then
+                local aiming,entity=GetEntityPlayerIsFreeAimingAt(PlayerId())
+                if aiming and entity and entity~=0 then
+                    local c=GetEntityCoords(entity)
+                    drawLabel(0.015,0.86,('ENTITY id %s | model %s | type %s | %.2f %.2f %.2f'):format(entity,GetEntityModel(entity),GetEntityType(entity),c.x,c.y,c.z))
+                else drawLabel(0.015,0.86,'ENTITY: aim at an entity') end
+            end
+            Wait(0)
+        else Wait(300) end
+    end
+end)
 local function open()
     local options={
         {title='Coordinate collector',description='Open the existing pointer and group capture tool',onSelect=function() ExecuteCommand('devcoords') end},
@@ -120,6 +192,15 @@ local function open()
         {title='Copy vector4',onSelect=function() ExecuteCommand('vector4') end},
         {title='Copy heading',onSelect=function() ExecuteCommand('heading') end},
         {title='Toggle live coordinates',onSelect=function() ExecuteCommand('coords') end},
+        {title='Toggle NoClip',description='WASD move, Space up, Ctrl down, Shift faster',onSelect=toggleNoClip},
+        {title='Toggle vehicle developer HUD',onSelect=function() showVehicleInfo=not showVehicleInfo end},
+        {title='Toggle aimed entity information',onSelect=function() showEntityInfo=not showEntityInfo end},
+        {title='Copy aimed entity model',onSelect=function()
+            local aiming,entity=GetEntityPlayerIsFreeAimingAt(PlayerId())
+            if not aiming or entity==0 then return notify('Aim at an entity first.','error') end
+            lib.setClipboard(tostring(GetEntityModel(entity)))
+            notify('Entity model copied.','success')
+        end},
         {title='Spawn vehicle',onSelect=spawnVehicle},
         {title='Repair vehicle',onSelect=repair},
         {title='Delete vehicle',onSelect=deleteVehicle},
