@@ -457,12 +457,12 @@ end
 -- PM DevCoords ox_lib integration; the rendering and original E/G/H behavior above
 -- are retained from qb-adminmenu's entity_view.lua.
 local function CopyFullEntity()
-    local entity=GetFreeAimEntity()
-    if not entity or entity==0 or not DoesEntityExist(entity) then
-        local hit,_,target=RayCastGamePlayCamera(1000.0)
-        if hit and target and target~=0 and DoesEntityExist(target) then entity=target end
+    -- Use a fresh raycast; never copy an entity that was aimed at earlier.
+    local hit,_,entity=RayCastGamePlayCamera(1000.0)
+    if not hit or not entity or entity==0 or not DoesEntityExist(entity) then
+        PMNotify('Aim at an entity first','error')
+        return
     end
-    if not entity or entity==0 or not DoesEntityExist(entity) then PMNotify('Aim at an entity first','error');return end
     local hash=GetEntityModel(entity)
     local name=IsEntityAVehicle(entity) and GetDisplayNameFromVehicleModel(hash) or tostring(hash)
     local c=GetEntityCoords(entity)
