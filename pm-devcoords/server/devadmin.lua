@@ -19,6 +19,10 @@ RegisterCommand('coords', function(src)
     if not permitted(src) then return tell(src, 'Developer permission required.', 'error') end
     TriggerClientEvent('pm-devcoords:devadmin:coords', src)
 end, false)
+RegisterCommand('maxmods', function(src)
+    if not permitted(src) then return tell(src, 'Developer permission required.', 'error') end
+    TriggerClientEvent('pm-devcoords:devadmin:maxmods', src)
+end, false)
 RegisterCommand('admincar', function(src)
     if not permitted(src) then return tell(src, 'Developer permission required.', 'error') end
     TriggerClientEvent('pm-devcoords:devadmin:admincar', src)
