@@ -44,6 +44,8 @@ end
 for _,title in ipairs({'God mode','High jump','Movement speed','NoClip','Spawn vehicle'}) do
   assert(not titles[title], 'duplicate admin menu option '..title)
 end
+titles['Coordinate collector'].onSelect()
+assert(commands[#commands]=='devcoordscollector')
 titles['Copy vector3'].onSelect()
 assert(commands[#commands]=='vector3')
 titles['Set ped model'].onSelect()
