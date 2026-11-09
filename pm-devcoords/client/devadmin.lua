@@ -84,7 +84,7 @@ CreateThread(function()
                     local hash=GetEntityModel(car)
                     drawLabel(0.4,0.888,'Vehicle Developer Data')
                     drawLabel(0.4,0.913,('Entity: %s | Network: %s'):format(car,NetworkGetEntityIsNetworked(car) and NetworkGetNetworkIdFromEntity(car) or 'not networked'))
-                    drawLabel(0.4,0.938,('Model: %s | Hash: %s'):format(GetDisplayNameFromVehicleModel(hash),hash))
+                    drawLabel(0.4,0.938,('Model: %s | Hash: %s'):format(GetLabelText(GetDisplayNameFromVehicleModel(hash)),hash))
                     drawLabel(0.4,0.963,('Engine: %.2f | Body: %.2f'):format(GetVehicleEngineHealth(car),GetVehicleBodyHealth(car)))
                 end
             Wait(0)
