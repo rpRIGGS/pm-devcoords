@@ -13,7 +13,8 @@ Aim at a world surface (a successful raycast hit is required to save), capture `
 
 ## Use
 
-- `/devcoords`: toggle the tool; the ox_lib menu opens on activation.
+- `/devcoords`: open the unified PM DevCoords developer menu (also available as `/devadmin`).
+- **Coordinate collector** in the main menu: start or stop the pointer capture overlay and open its collection menu.
 - `/devcoordsmenu`: reopen the menu while the tool is active.
 - `J`: capture the aimed point into the selected collection.
 - `K`: undo the last point in the selected collection.
@@ -33,11 +34,11 @@ Original project: [yy-devcoords](https://github.com/LuckyyFishyy/yy-devcoords) b
 
 ## Vineyard capture example
 
-1. Run `/devcoords` and choose **New group / collection**: Group `V01A`, Subgroup `Row_01`, Collection `SideA`.
+1. Run `/devcoords`, select **Coordinate collector**, and choose **New group / collection**: Group `V01A`, Subgroup `Row_01`, Collection `SideA`.
 2. Aim at each position and press **J**. Each capture immediately saves to `captures.json`; no separate save action is needed.
 3. Reopen the menu with `/devcoordsmenu`, create `V01A / Row_01 / SideB`, and capture Side B points with **J**.
 4. Continue with other rows as needed. Choose **Finish / Export group (.txt)** to write `V01A.txt` and clear the selection **after a successful export**.
-5. Run `/devcoords` to close the tool. The JSON remains saved even if you do not export; text exports are snapshots and should be regenerated after later edits.
+5. Select **Coordinate collector** again to close the capture overlay. The JSON remains saved even if you do not export; text exports are snapshots and should be regenerated after later edits.
 
 The `.txt` file contains readable named Lua-style `vector3(...)` / `vector4(...)` coordinates, grouped by row and side, suitable for copying into chat. It is stored on the **server**, not automatically downloaded to your PC's client folder.
 
