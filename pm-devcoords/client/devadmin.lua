@@ -95,6 +95,22 @@ CreateThread(function()
         else Wait(300) end
     end
 end)
+
+RegisterNetEvent('pm-devcoords:devadmin:setmodel',function(name)
+    local hash=joaat(name)
+    if not IsModelInCdimage(hash) or not IsModelValid(hash) or not IsModelAPed(hash) then return notify('Invalid ped model.','error') end
+    lib.requestModel(hash)
+    SetPlayerModel(PlayerId(),hash)
+    SetModelAsNoLongerNeeded(hash)
+    notify('Ped model changed to '..name,'success')
+end)
+RegisterNetEvent('pm-devcoords:devadmin:setspeed',function(speed)
+    local multiplier=speed=='fast' and 1.49 or 1.0
+    SetRunSprintMultiplierForPlayer(PlayerId(),multiplier)
+    SetSwimMultiplierForPlayer(PlayerId(),multiplier)
+    notify('Movement speed '..(speed=='fast' and 'fast' or 'normal'),'success')
+end)
+
 local function open()
     local options={
         {title='Coordinate collector',description='Open the existing pointer and group capture tool',onSelect=function() ExecuteCommand('devcoords') end},
@@ -119,6 +135,14 @@ local function open()
         {title='Max vehicle upgrades',onSelect=maxVehicle},
         {title='Save vehicle (/admincar)',description='Add your current QBCore vehicle to player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
         {title='Teleport to waypoint',onSelect=waypoint},
+        {title='Set ped model',onSelect=function()
+            local v=lib.inputDialog('Developer ped model',{{type='input',label='Model name',required=true}})
+            if v then ExecuteCommand('setmodel '..v[1]) end
+        end},
+        {title='Movement speed',onSelect=function()
+            local v=lib.inputDialog('Movement speed',{{type='select',label='Speed',options={{value='fast',label='Fast'},{value='normal',label='Normal'}},required=true}})
+            if v then ExecuteCommand('setspeed '..v[1]) end
+        end},
     }
     lib.registerContext({id='pm_devcoords_devadmin',title='PowerMoves Developer Tools',options=options})
     lib.showContext('pm_devcoords_devadmin')
