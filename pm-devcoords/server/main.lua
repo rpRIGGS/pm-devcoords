@@ -93,7 +93,7 @@ end
 
 load()
 
-RegisterCommand('devcoords', function(src)
+RegisterCommand('devcoordscollector', function(src)
     if src == 0 then return end
     if not allowed(src) then return notify(src, 'Administrator permission required.', 'error') end
     TriggerClientEvent('pm-devcoords:toggle', src)
