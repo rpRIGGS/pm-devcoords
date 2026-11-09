@@ -5,12 +5,10 @@ end
 local function tell(src, message, kind)
     TriggerClientEvent('pm-devcoords:notify', src, message, kind or 'inform')
 end
-for _, entryCommand in ipairs({'devcoords', 'devadmin'}) do
-RegisterCommand(entryCommand, function(src)
+RegisterCommand('devadmin', function(src)
     if not permitted(src) then return tell(src, 'Developer permission required.', 'error') end
     TriggerClientEvent('pm-devcoords:devadmin:open', src)
 end, false)
-end
 for _, command in ipairs({'vector2','vector3','vector4','heading'}) do
     RegisterCommand(command, function(src)
         if not permitted(src) then return tell(src, 'Developer permission required.', 'error') end
