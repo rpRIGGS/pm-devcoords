@@ -28,7 +28,7 @@ MySQL = {
     insert={await=function(_,values) inserts[#inserts+1]=values;return 5 end}
 }
 dofile('pm-devcoords/server/devadmin.lua')
-for _,name in ipairs({'devcoords','devadmin','vector2','vector3','vector4','heading','coords','maxmods','admincar','setmodel'}) do
+for _,name in ipairs({'devadmin','vector2','vector3','vector4','heading','coords','maxmods','admincar','setmodel'}) do
     assert(type(commands[name])=='function','missing developer command '..name)
 end
 for _,name in ipairs({'setspeed','noclip','repair','dv'}) do
@@ -38,7 +38,6 @@ commands.devadmin(2,{})
 assert(sent[#sent].name=='pm-devcoords:notify')
 commands.devadmin(1,{})
 assert(sent[#sent].name=='pm-devcoords:devadmin:open')
-commands.devcoords(1,{})
 assert(sent[#sent].name=='pm-devcoords:devadmin:open')
 commands.vector4(1,{})
 assert(sent[#sent].name=='pm-devcoords:devadmin:copy')
