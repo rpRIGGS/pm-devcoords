@@ -82,87 +82,32 @@ local RayCastGamePlayCamera = function(distance)
 end
 
 local DrawEntityBoundingBox = function(entity, color)
-    local model = GetEntityModel(entity)
-    local min, max = GetModelDimensions(model)
-    local rightVector, forwardVector, upVector, position = GetEntityMatrix(entity)
-
-    -- Calculate size
-    local dim = {
-        x = 0.5 * (max.x - min.x),
-        y = 0.5 * (max.y - min.y),
-        z = 0.5 * (max.z - min.z)
-    }
-
-    local FUR = {
-        x = position.x + dim.y * rightVector.x + dim.x * forwardVector.x + dim.z * upVector.x,
-        y = position.y + dim.y * rightVector.y + dim.x * forwardVector.y + dim.z * upVector.y,
-        z = 0
-    }
-
-    local _, FUR_z = GetGroundZFor_3dCoord(FUR.x, FUR.y, 1000.0, 0)
-    FUR.z = FUR_z
-    FUR.z = FUR.z + 2 * dim.z
-
-    local BLL = {
-        x = position.x - dim.y * rightVector.x - dim.x * forwardVector.x - dim.z * upVector.x,
-        y = position.y - dim.y * rightVector.y - dim.x * forwardVector.y - dim.z * upVector.y,
-        z = 0
-    }
-    local _, BLL_z = GetGroundZFor_3dCoord(FUR.x, FUR.y, 1000.0, 0)
-    BLL.z = BLL_z
-
-    -- DEBUG
-    local edge1 = BLL
-    local edge5 = FUR
-
-    local edge2 = {
-        x = edge1.x + 2 * dim.y * rightVector.x,
-        y = edge1.y + 2 * dim.y * rightVector.y,
-        z = edge1.z + 2 * dim.y * rightVector.z
-    }
-
-    local edge3 = {
-        x = edge2.x + 2 * dim.z * upVector.x,
-        y = edge2.y + 2 * dim.z * upVector.y,
-        z = edge2.z + 2 * dim.z * upVector.z
-    }
-
-    local edge4 = {
-        x = edge1.x + 2 * dim.z * upVector.x,
-        y = edge1.y + 2 * dim.z * upVector.y,
-        z = edge1.z + 2 * dim.z * upVector.z
-    }
-
-    local edge6 = {
-        x = edge5.x - 2 * dim.y * rightVector.x,
-        y = edge5.y - 2 * dim.y * rightVector.y,
-        z = edge5.z - 2 * dim.y * rightVector.z
-    }
-
-    local edge7 = {
-        x = edge6.x - 2 * dim.z * upVector.x,
-        y = edge6.y - 2 * dim.z * upVector.y,
-        z = edge6.z - 2 * dim.z * upVector.z
-    }
-
-    local edge8 = {
-        x = edge5.x - 2 * dim.z * upVector.x,
-        y = edge5.y - 2 * dim.z * upVector.y,
-        z = edge5.z - 2 * dim.z * upVector.z
-    }
-    color = (color == nil and { r = 255, g = 255, b = 255, a = 255 } or color)
-    DrawLine(edge1.x, edge1.y, edge1.z, edge2.x, edge2.y, edge2.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge1.x, edge1.y, edge1.z, edge4.x, edge4.y, edge4.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge2.x, edge2.y, edge2.z, edge3.x, edge3.y, edge3.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge3.x, edge3.y, edge3.z, edge4.x, edge4.y, edge4.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge5.x, edge5.y, edge5.z, edge6.x, edge6.y, edge6.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge5.x, edge5.y, edge5.z, edge8.x, edge8.y, edge8.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge6.x, edge6.y, edge6.z, edge7.x, edge7.y, edge7.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge7.x, edge7.y, edge7.z, edge8.x, edge8.y, edge8.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge1.x, edge1.y, edge1.z, edge7.x, edge7.y, edge7.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge2.x, edge2.y, edge2.z, edge8.x, edge8.y, edge8.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge3.x, edge3.y, edge3.z, edge5.x, edge5.y, edge5.z, color.r, color.g, color.b, color.a)
-    DrawLine(edge4.x, edge4.y, edge4.z, edge6.x, edge6.y, edge6.z, color.r, color.g, color.b, color.a)
+    if not entity or entity == 0 or not DoesEntityExist(entity) then return end
+    local minimum, maximum = GetModelDimensions(GetEntityModel(entity))
+    local right, forward, up, position = GetEntityMatrix(entity)
+    if not minimum or not maximum then return end
+    color = color or {r=255,g=255,b=255,a=255}
+    local corners = {}
+    for _, x in ipairs({minimum.x, maximum.x}) do
+        for _, y in ipairs({minimum.y, maximum.y}) do
+            for _, z in ipairs({minimum.z, maximum.z}) do
+                corners[#corners+1] = vector3(
+                    position.x + right.x*x + forward.x*y + up.x*z,
+                    position.y + right.y*x + forward.y*y + up.y*z,
+                    position.z + right.z*x + forward.z*y + up.z*z
+                )
+            end
+        end
+    end
+    for i=1,8 do
+        for _, bit in ipairs({1,2,4}) do
+            local j = ((i-1) ~ bit) + 1
+            if j > i then
+                local a,b = corners[i],corners[j]
+                DrawLine(a.x,a.y,a.z,b.x,b.y,b.z,color.r,color.g,color.b,color.a)
+            end
+        end
+    end
 end
 
 local GetEntityInfo = function(entity)
@@ -170,7 +115,7 @@ local GetEntityInfo = function(entity)
     local entityType   = GetEntityType(entity)
     local entityHash   = GetEntityModel(entity)
     local entityName   = (IsEntityAVehicle(entity) and GetDisplayNameFromVehicleModel(entityHash) or tostring(entityHash))
-    local entityData   = { '~y~' .. "Entity Information", '', "Model hash:" .. ' ~y~' .. entityHash, ' ', "Entity ID:" .. ' ~y~' .. entity, "Model name:" .. ' ~y~' .. entityName, "Network ID:" .. ' ~y~' .. (NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or 'Not networked'), "Owner:" .. ' ~y~' .. GetPlayerServerId(NetworkGetEntityOwner(entity)), ' ' }
+    local entityData   = { '~y~' .. "Entity Information", '', "Model hash:" .. ' ~y~' .. entityHash, ' ', "Entity ID:" .. ' ~y~' .. entity, "Model name:" .. ' ~y~' .. entityName, "Network ID:" .. ' ~y~' .. (NetworkGetEntityIsNetworked(entity) and NetworkGetNetworkIdFromEntity(entity) or 'Not networked'), "Owner:" .. ' ~y~' .. (NetworkGetEntityIsNetworked(entity) and tostring(GetPlayerServerId(NetworkGetEntityOwner(entity))) or 'Not networked'), ' ' }
 
     if entityType == 1 then
         local pedRelationshipGroup = GetPedRelationshipGroupHash(entity)
