@@ -52,6 +52,6 @@ Use **/devadmin** to open the ox_lib developer menu. The original qb-adminmenu d
 
 **Excluded intentionally:** vehicle spawning, /repair, /dv, NoClip, god mode, high jump and running-speed changes, which are already provided by Legend or txAdmin. There is no reason to duplicate those features. The original qb-adminmenu vehicle category browser belongs to its vehicle spawner and is likewise excluded.
 
-**Permissions:** /devadmin and developer slash commands require ACE `command.devcoords` or QBCore admin/god. The original pointer collector continues to require ACE `command.devcoords`. Use `add_ace group.admin command.devcoords allow` (or an equivalent principal grant) if appropriate for your server permissions.
+**Permissions:** All PM DevCoords features use the same server-side ACE permission, `command.devcoords`. Grant it to your existing administrator principal using `add_ace group.admin command.devcoords allow` (or the appropriate ACE group for your server). QBCore admin/god alone does not bypass this resource's ACE check.
 
 **Validation:** GitHub Actions checks Lua syntax and the repository's automated tests. Live FiveM verification remains required for client natives, entity controls, clipboard, /admincar database writes, and coexistence with Legend/txAdmin. A passing CI run is not a claim of successful in-game testing.
