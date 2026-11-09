@@ -1,3 +1,5 @@
+/* PowerMoves RP official blue: #0438FF / RGB(4, 56, 255) */
+:root { --pm-blue: #0438ff; --pm-blue-rgb: 4, 56, 255; }
 * { box-sizing: border-box; }
 body {
     margin: 0;
@@ -12,32 +14,32 @@ body {
     bottom: 4vh;
     width: min(380px, 92vw);
     padding: 14px;
-    border: 1px solid rgba(120, 200, 255, 0.28);
+    border: 1px solid rgba(4, 56, 255, 0.65);
     border-radius: 12px;
     background: rgba(9, 20, 33, 0.94);
 }
 .panel-header { margin-bottom: 6px; }
-.panel-title { font-size: 16px; font-weight: 700; color: #bfe7ff; }
+.panel-title { font-size: 16px; font-weight: 700; color: #dce4ff; }
 .panel-subtitle {
     margin-bottom: 8px;
-    color: rgba(191, 231, 255, 0.8);
+    color: rgba(220, 228, 255, 0.8);
     font-size: 12px;
     overflow-wrap: anywhere;
 }
 .panel-grid { display: grid; gap: 8px; }
 .panel-card {
     padding: 10px;
-    border: 1px solid rgba(120, 200, 255, 0.2);
+    border: 1px solid rgba(4, 56, 255, 0.45);
     border-radius: 8px;
     background: rgba(8, 18, 28, 0.78);
 }
 .card-title {
     margin-bottom: 6px;
-    color: rgba(191, 231, 255, 0.7);
+    color: rgba(220, 228, 255, 0.7);
     font-size: 11px;
 }
 .card-value {
-    color: #8bd3ff;
+    color: #8da6ff;
     font-family: Consolas, monospace;
     font-size: 12px;
     overflow-wrap: anywhere;
