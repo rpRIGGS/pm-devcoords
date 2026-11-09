@@ -30,7 +30,12 @@ RegisterNetEvent('pm-devcoords:devadmin:savecar', function(props)
     local ped = GetPlayerPed(src)
     local driven = GetVehiclePedIsIn(ped, false)
     if driven == 0 or GetPedInVehicleSeat(driven, -1) ~= ped then return tell(src, 'You must be driving the vehicle.', 'error') end
-    if GetEntityModel(driven) ~= props.model or GetVehicleNumberPlateText(driven):match('^%s*(.-)%s*
+    local currentPlate = GetVehicleNumberPlateText(driven):gsub('^%s+', ''):gsub('%s+$', '')
+    local submittedPlate = props.plate:gsub('^%s+', ''):gsub('%s+$', '')
+    if GetEntityModel(driven) ~= props.model or currentPlate ~= submittedPlate then
+        return tell(src, 'Vehicle details do not match the driven vehicle.', 'error')
+    end
+    local player = QBCore.Functions.GetPlayer(src)
     if not player then return end
     local vehicleName
     for name, definition in pairs(QBCore.Shared.Vehicles or {}) do
