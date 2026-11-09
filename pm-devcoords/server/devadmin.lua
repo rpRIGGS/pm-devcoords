@@ -43,9 +43,13 @@ RegisterNetEvent('pm-devcoords:devadmin:savecar', function(props)
     if not player then return end
     local vehicleName
     for name, definition in pairs(QBCore.Shared.Vehicles or {}) do
-        if type(definition) == 'table' and (GetHashKey(definition.model or name) == props.model or tonumber(definition.hash) == props.model) then
-            vehicleName = definition.model or name
-            break
+        if type(definition) == 'table' then
+            local model = definition.model or name
+            local hash = type(model) == 'number' and model or (type(model) == 'string' and GetHashKey(model))
+            if hash == props.model or tonumber(definition.hash) == props.model then
+                vehicleName = type(model) == 'string' and model or name
+                break
+            end
         end
     end
     if not vehicleName then return tell(src, 'Vehicle model not in QBCore shared vehicles.', 'error') end
