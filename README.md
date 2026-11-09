@@ -13,7 +13,7 @@ This is **one resource**, not two admin scripts. Coordinate capture remains a fe
 
 ## Main menu and commands
 
-Run `/devadmin` to open the unified developer menu. There is no separate `/devcoords` entry command.
+Run `/devadmin` to open the unified developer menu.
 
 - `/devadmin`: open the unified PM DevCoords developer menu.
 - **Coordinate collector** in the main menu: start or stop the pointer capture overlay and open its collection menu.
