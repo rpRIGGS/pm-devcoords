@@ -87,17 +87,20 @@ local function deleteVehicle()
     notify('Vehicle delete requested.')
 end
 local function maxVehicle()
-    local car = vehicle()
-    if not car then return notify('No vehicle nearby.', 'error') end
-    SetVehicleModKit(car,0)
-    for slot=0,49 do
-        local max=GetNumVehicleMods(car,slot)-1
-        if max>=0 then SetVehicleMod(car,slot,max,false) end
+    local car = GetVehiclePedIsIn(PlayerPedId(), false)
+    if car == 0 then return notify('Enter a vehicle to apply max performance upgrades.', 'error') end
+    if GetPedInVehicleSeat(car, -1) ~= PlayerPedId() then return notify('You must be the driver.', 'error') end
+    SetVehicleModKit(car, 0)
+    -- Original qb-adminmenu performance upgrade slots (not every cosmetic mod).
+    for _, slot in ipairs({11, 12, 13, 15, 16}) do
+        local highest = GetNumVehicleMods(car, slot) - 1
+        if highest >= 0 then SetVehicleMod(car, slot, highest, false) end
     end
-    ToggleVehicleMod(car,18,true)
+    ToggleVehicleMod(car, 18, true)
     SetVehicleFixed(car)
-    notify('Vehicle upgrades applied.','success')
+    notify('Maximum performance upgrades applied.', 'success')
 end
+RegisterNetEvent('pm-devcoords:devadmin:maxmods', maxVehicle)
 local function waypoint()
     local blip=GetFirstBlipInfoId(8)
     if not DoesBlipExist(blip) then return notify('Set a waypoint first.','error') end
@@ -204,9 +207,6 @@ local function open()
             lib.setClipboard(tostring(GetEntityModel(entity)))
             notify('Entity model copied.','success')
         end},
-        {title='Spawn vehicle',onSelect=spawnVehicle},
-
-        {title='Delete vehicle',onSelect=deleteVehicle},
         {title='Max vehicle upgrades',onSelect=maxVehicle},
         {title='Save vehicle (/admincar)',description='Add your current QBCore vehicle to player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
         {title='Teleport to waypoint',onSelect=waypoint},
