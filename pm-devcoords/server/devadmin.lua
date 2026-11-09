@@ -73,7 +73,3 @@ RegisterCommand('setmodel', function(src,args)
     if not QBCore.Functions.GetPlayer(target) then return tell(src,'Player not online.','error') end
     TriggerClientEvent('pm-devcoords:devadmin:setmodel',target,model)
 end,false)
-RegisterCommand('setspeed', function(src,args)
-    if not permitted(src) then return tell(src,'Developer permission required.','error') end
-    TriggerClientEvent('pm-devcoords:devadmin:setspeed',src,args[1]=='fast' and 'fast' or 'normal')
-end,false)
