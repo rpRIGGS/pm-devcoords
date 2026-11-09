@@ -148,3 +148,11 @@ local function open()
     lib.showContext('pm_devcoords_devadmin')
 end
 RegisterNetEvent('pm-devcoords:devadmin:open',open)
+
+-- Restore player state when this resource is stopped or restarted.
+AddEventHandler('onResourceStop', function(resource)
+    if resource ~= GetCurrentResourceName() then return end
+    if showDevHud then SetPlayerInvincible(PlayerId(), false) end
+    SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
+    SetSwimMultiplierForPlayer(PlayerId(), 1.0)
+end)
