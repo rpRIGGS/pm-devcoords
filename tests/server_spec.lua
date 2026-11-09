@@ -3,10 +3,11 @@ local commands, events, files, notices = {}, {}, {}, {}
 local authorized = { [1] = true, [2] = false }
 local failWrites = false
 GetCurrentResourceName = function() return 'pm-devcoords' end
-IsPlayerAceAllowed = function(src, ace)
-    assert(ace == 'command.devcoords')
+exports = {['qb-core'] = {GetCoreObject = function() return {Functions={HasPermission=function(src, role)
+    assert(role == 'admin' or role == 'god')
     return authorized[src] or false
-end
+end}} end}}
+IsPlayerAceAllowed = function() error('Custom ACE must not be checked') end
 RegisterCommand = function(name, fn) commands[name] = fn end
 RegisterNetEvent = function(name, fn) events[name] = fn end
 TriggerClientEvent = function(name, target, ...)
