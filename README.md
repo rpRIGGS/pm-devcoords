@@ -4,6 +4,10 @@
 
 This is **one resource**, not two admin scripts. Coordinate capture remains a feature within the developer menu, including persistent grouped captures and readable `.txt` exports. Individual developer chat commands remain available.
 
+## Branding
+
+Official PowerMoves RP blue: **`#0438FF`** (RGB **4, 56, 255**). The resource's coordinate collector overlay and world markers use this blue. The `/devadmin` menus use ox_lib's context UI and inherit its styling; changing their accent independently would require additional UI theming rather than just the resource's CSS.
+
 ## Install
 
 1. Copy the **inner `pm-devcoords/` folder** (the one containing `fxmanifest.lua`) into your server resources directory. Do not install the entire GitHub repository as the resource.
