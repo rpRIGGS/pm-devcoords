@@ -25,7 +25,7 @@ Captured points are written to `captures.json` in the resource directory. **Fini
 
 ## Status
 
-Automated GitHub Actions checks cover Lua syntax, mocked server and client behavior, and the NUI overlay. **Not yet tested in a running FiveM server**. The in-game test must confirm raycast placement, menu controls, ACE permission, persistence after restart, and text export creation.
+Automated GitHub Actions checks cover Lua syntax, mocked collector and developer-command server behavior, mocked collector client behavior, and the NUI overlay. **Not yet tested in a running FiveM server**. The in-game test must confirm raycast placement, menu controls, ACE permission, persistence after restart, and text export creation.
 
 ## Credits
 
@@ -46,9 +46,9 @@ The `.txt` file contains readable named Lua-style `vector3(...)` / `vector4(...)
 Use **/devadmin** to open the ox_lib developer menu. The original qb-adminmenu developer tools are integrated into this single PM DevCoords resource, alongside the original pointer-based coordinate collector.
 
 - **Coordinates:** /vector2, /vector3, /vector4, /heading, /coords; two-decimal clipboard output and live vector4 HUD. The pointer collector retains /devcoords, /devcoordsmenu, J capture, K undo, group/row/side selection and .txt export.
-- **Vehicles:** /maxmods applies the original performance slots (11, 12, 13, 15, 16, turbo); /admincar saves the driven vehicle's properties into QBCore player_vehicles after model, plate and ownership validation. Vehicle developer HUD displays entity ID, net ID, model name/hash, engine and body health.
+- **Vehicles:** /maxmods applies the original performance slots (11, 12, 13, 15, 16, turbo); /admincar saves the driven vehicle's properties into QBCore player_vehicles after server-side driver, model and plate validation. Vehicle developer HUD displays entity ID, net ID, model name/hash, engine and body health.
 - **Entity viewer:** original qb-adminmenu raycast, detailed aimed entity panel, 3D bounding boxes, nearby objects/vehicles/peds, 5–50m radius, E delete, G freeze/unfreeze, H copy pointed vector3, and full entity information clipboard output. The viewer supports an independently toggled free-aim mode.
-- **Additional developer commands:** /setmodel <model> [player id],. Waypoint teleport is available from the ox_lib menu..
+- **Additional developer commands:** `/setmodel <model> [player id]` changes a ped model (including an online player ID when specified). Waypoint teleport is available from the ox_lib menu.
 
 **Excluded intentionally:** vehicle spawning, /repair, /dv, NoClip, god mode, high jump and running-speed changes, which are already provided by Legend or txAdmin. There is no reason to duplicate those features. The original qb-adminmenu vehicle category browser belongs to its vehicle spawner and is likewise excluded.
 
