@@ -2,6 +2,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local showCoords = false
 local showVehicleInfo = false
 local showEntityInfo = false
+local showDevHud = false
 local noclip = false
 local noclipEntity = nil
 local noclipSpeed = 1.5
@@ -24,9 +25,9 @@ local function copy(kind)
     local c = GetEntityCoords(ped)
     local h = GetEntityHeading(ped)
     local result
-    if kind == 'vector2' then result = ('vector2(%.3f, %.3f)'):format(c.x,c.y)
-    elseif kind == 'vector3' then result = ('vector3(%.3f, %.3f, %.3f)'):format(c.x,c.y,c.z)
-    elseif kind == 'vector4' then result = ('vector4(%.3f, %.3f, %.3f, %.2f)'):format(c.x,c.y,c.z,h)
+    if kind == 'vector2' then result = ('vector2(%.2f, %.2f)'):format(c.x,c.y)
+    elseif kind == 'vector3' then result = ('vector3(%.2f, %.2f, %.2f)'):format(c.x,c.y,c.z)
+    elseif kind == 'vector4' then result = ('vector4(%.2f, %.2f, %.2f, %.2f)'):format(c.x,c.y,c.z,h)
     elseif kind == 'heading' then result = ('%.2f'):format(h) end
     if result then lib.setClipboard(result); notify('Copied '..kind..': '..result, 'success') end
 end
@@ -40,7 +41,7 @@ CreateThread(function()
         if showCoords then
             local c = GetEntityCoords(PlayerPedId())
             local h = GetEntityHeading(PlayerPedId())
-            drawLabel(0.015,0.78,('X %.3f | Y %.3f | Z %.3f | H %.2f'):format(c.x,c.y,c.z,h))
+            drawLabel(0.4,0.025,('vector4(%.2f, %.2f, %.2f, %.2f)'):format(c.x,c.y,c.z,h))
             Wait(0)
         else Wait(400) end
     end
@@ -167,21 +168,18 @@ CreateThread(function()
 end)
 CreateThread(function()
     while true do
-        if showVehicleInfo or showEntityInfo then
+        if showVehicleInfo or showDevHud then
             if showVehicleInfo then
-                local car=vehicle()
-                if car then
-                    local c=GetEntityCoords(car)
-                    drawLabel(0.015,0.82,('VEHICLE model %s | plate %s | net %s | %.2f %.2f %.2f'):format(GetEntityModel(car),GetVehicleNumberPlateText(car),NetworkGetNetworkIdFromEntity(car),c.x,c.y,c.z))
-                else drawLabel(0.015,0.82,'VEHICLE: none nearby') end
+                local car=GetVehiclePedIsIn(PlayerPedId(),false)
+                if car~=0 then
+                    local hash=GetEntityModel(car)
+                    drawLabel(0.4,0.888,'Vehicle Developer Data')
+                    drawLabel(0.4,0.913,('Entity: %s | Network: %s'):format(car,NetworkGetNetworkIdFromEntity(car)))
+                    drawLabel(0.4,0.938,('Model: %s | Hash: %s'):format(GetLabelText(GetDisplayNameFromVehicleModel(hash)),hash))
+                    drawLabel(0.4,0.963,('Engine: %.2f | Body: %.2f'):format(GetVehicleEngineHealth(car),GetVehicleBodyHealth(car)))
+                end
             end
-            if showEntityInfo then
-                local aiming,entity=GetEntityPlayerIsFreeAimingAt(PlayerId())
-                if aiming and entity and entity~=0 then
-                    local c=GetEntityCoords(entity)
-                    drawLabel(0.015,0.86,('ENTITY id %s | model %s | type %s | %.2f %.2f %.2f'):format(entity,GetEntityModel(entity),GetEntityType(entity),c.x,c.y,c.z))
-                else drawLabel(0.015,0.86,'ENTITY: aim at an entity') end
-            end
+            if showDevHud then drawLabel(0.015,0.05,'Developer HUD enabled') end
             Wait(0)
         else Wait(300) end
     end
@@ -201,11 +199,11 @@ local function open()
         {title='Entity viewer: nearby vehicles',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','vehicles') end},
         {title='Entity viewer: nearby peds',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','peds') end},
         {title='Entity viewer: distance',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','distance') end},
-        {title='Copy aimed entity model',onSelect=function()
-            local aiming,entity=GetEntityPlayerIsFreeAimingAt(PlayerId())
-            if not aiming or entity==0 then return notify('Aim at an entity first.','error') end
-            lib.setClipboard(tostring(GetEntityModel(entity)))
-            notify('Entity model copied.','success')
+        {title='Copy full aimed entity information',onSelect=function() TriggerEvent('pm-devcoords:devadmin:copyEntity') end},
+        {title='Toggle HUD developer mode',onSelect=function()
+            showDevHud=not showDevHud
+            SetPlayerInvincible(PlayerId(),showDevHud)
+            notify('Developer HUD '..(showDevHud and 'enabled' or 'disabled'))
         end},
         {title='Max vehicle upgrades',onSelect=maxVehicle},
         {title='Save vehicle (/admincar)',description='Add your current QBCore vehicle to player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
