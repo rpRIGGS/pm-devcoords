@@ -1,8 +1,8 @@
 # PM DevCoords
 
-Standalone FiveM developer coordinate capture and utility menu for PowerMoves RP, based on yy-devcoords by LuckyyFishyy.
+**PM DevCoords is the unified QBCore developer toolkit for PowerMoves RP.** One ox_lib menu (`/devadmin`) combines pointer-based coordinate capture, entity inspection, vehicle developer utilities, and selected tools adapted from qb-adminmenu.
 
-Aim at a world surface (a successful raycast hit is required to save), capture `vector3(...)` or `vector4(...)` coordinates, organize points by named groups and collections, and save/export them to a plain-text coordinate file.
+This is **one resource**, not two admin scripts. Coordinate capture remains a feature within the developer menu, including persistent grouped captures and readable `.txt` exports. Individual developer chat commands remain available.
 
 ## Install
 
@@ -11,7 +11,9 @@ Aim at a world surface (a successful raycast hit is required to save), capture `
 3. Add `ensure pm-devcoords` after those dependencies in `server.cfg`.
 4. No new ACE permission is required. Access uses your existing QBCore `admin` or `god` permissions.
 
-## Use
+## Main menu and commands
+
+Run `/devadmin` to open the unified developer menu. There is no separate `/devcoords` entry command.
 
 - `/devadmin`: open the unified PM DevCoords developer menu.
 - **Coordinate collector** in the main menu: start or stop the pointer capture overlay and open its collection menu.
@@ -24,9 +26,9 @@ Use the menu to create or select a group and collection. An optional subgroup ca
 
 Captured points are written to `captures.json` in the resource directory. **Finish / Export group (.txt)** writes `<group>.txt` within the resource. These files are created on the server, not downloaded to the client. Preserve them when updating the resource.
 
-## Status
+## Validation status
 
-Automated GitHub Actions checks cover Lua syntax, mocked collector and developer-command server behavior, mocked collector client behavior, and the NUI overlay. **Not yet tested in a running FiveM server**. The in-game test must confirm raycast placement, menu controls, ACE permission, persistence after restart, and text export creation.
+GitHub Actions tests cover Lua syntax, collector persistence/export and permission guards, developer commands, client menus, entity-viewer behavior, and the NUI overlay using mocked FiveM APIs. **Not yet tested in a running FiveM server.** In-game verification must cover raycast placement, menu controls, existing QBCore admin/god permissions, persistence after restart, text export, entity network control, and vehicle database saving.
 
 ## Credits
 
@@ -42,9 +44,9 @@ Original project: [yy-devcoords](https://github.com/LuckyyFishyy/yy-devcoords) b
 
 The `.txt` file contains readable named Lua-style `vector3(...)` / `vector4(...)` coordinates, grouped by row and side, suitable for copying into chat. It is stored on the **server**, not automatically downloaded to your PC's client folder.
 
-## Developer tools ported from qb-adminmenu
+## Integrated developer tools
 
-Use **/devadmin** to open the unified ox_lib developer menu. The original qb-adminmenu developer tools are integrated into this single PM DevCoords resource, alongside the original pointer-based coordinate collector.
+Use **/devadmin** to open the unified ox_lib developer menu. Selected qb-adminmenu developer features are integrated into this single PM DevCoords resource alongside the original pointer-based coordinate collector.
 
 - **Coordinates:** /vector2, /vector3, /vector4, /heading, /coords; two-decimal clipboard output and live vector4 HUD. The pointer collector is launched from the unified menu and retains /devcoordsmenu, J capture, K undo, group/row/side selection and .txt export.
 - **Vehicles:** /maxmods applies the original performance slots (11, 12, 13, 15, 16, turbo); /admincar saves the driven vehicle's properties into QBCore player_vehicles after server-side driver, model and plate validation. Vehicle developer HUD displays entity ID, net ID, model name/hash, engine and body health.
