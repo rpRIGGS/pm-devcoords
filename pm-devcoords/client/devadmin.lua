@@ -130,9 +130,9 @@ local function open()
         {title='Toggle HUD developer mode',onSelect=function()
             showDevHud=not showDevHud
             SetPlayerInvincible(PlayerId(),showDevHud)
-            notify('Developer HUD '..(showDevHud and 'enabled' or 'disabled'))
+            notify('Developer mode '..(showDevHud and 'enabled' or 'disabled'))
         end},
-        {title='Max vehicle upgrades',onSelect=maxVehicle},
+        {title='Max vehicle upgrades',onSelect=function() ExecuteCommand('maxmods') end},
         {title='Save vehicle (/admincar)',description='Add your current QBCore vehicle to player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
         {title='Teleport to waypoint',onSelect=waypoint},
         {title='Set ped model',onSelect=function()
