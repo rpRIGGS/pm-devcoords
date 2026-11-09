@@ -93,12 +93,12 @@ end
 
 load()
 
-RegisterCommand('devcoordscollector', function(src)
-    if src == 0 then return end
+RegisterNetEvent('pm-devcoords:collector:toggle', function()
+    local src = source
     if not allowed(src) then return notify(src, 'Administrator permission required.', 'error') end
     TriggerClientEvent('pm-devcoords:toggle', src)
     send(src)
-end, false)
+end)
 
 RegisterNetEvent('pm-devcoords:request', function()
     local src = source
