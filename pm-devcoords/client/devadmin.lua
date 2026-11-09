@@ -1,7 +1,6 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local showCoords = false
 local showVehicleInfo = false
-local showDevHud = false
 local function drawLabel(x,y,value)
     SetTextFont(4); SetTextScale(0.35,0.35); SetTextColour(255,255,255,255)
     SetTextOutline(); SetTextEntry('STRING'); AddTextComponentString(value); DrawText(x,y)
@@ -79,7 +78,7 @@ local function waypoint()
 end
 CreateThread(function()
     while true do
-        if showVehicleInfo or showDevHud then
+        if showVehicleInfo then
             if showVehicleInfo then
                 local car=GetVehiclePedIsIn(PlayerPedId(),false)
                 if car~=0 then
@@ -90,7 +89,6 @@ CreateThread(function()
                     drawLabel(0.4,0.963,('Engine: %.2f | Body: %.2f'):format(GetVehicleEngineHealth(car),GetVehicleBodyHealth(car)))
                 end
             end
-            if showDevHud then drawLabel(0.015,0.05,'Developer HUD enabled') end
             Wait(0)
         else Wait(300) end
     end
@@ -104,13 +102,6 @@ RegisterNetEvent('pm-devcoords:devadmin:setmodel',function(name)
     SetModelAsNoLongerNeeded(hash)
     notify('Ped model changed to '..name,'success')
 end)
-RegisterNetEvent('pm-devcoords:devadmin:setspeed',function(speed)
-    local multiplier=speed=='fast' and 1.49 or 1.0
-    SetRunSprintMultiplierForPlayer(PlayerId(),multiplier)
-    SetSwimMultiplierForPlayer(PlayerId(),multiplier)
-    notify('Movement speed '..(speed=='fast' and 'fast' or 'normal'),'success')
-end)
-
 local function open()
     local options={
         {title='Coordinate collector',description='Open the existing pointer and group capture tool',onSelect=function() ExecuteCommand('devcoords') end},
@@ -127,11 +118,6 @@ local function open()
         {title='Entity viewer: nearby peds',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','peds') end},
         {title='Entity viewer: distance',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','distance') end},
         {title='Copy full aimed entity information',onSelect=function() TriggerEvent('pm-devcoords:devadmin:copyEntity') end},
-        {title='Toggle HUD developer mode',onSelect=function()
-            showDevHud=not showDevHud
-            SetPlayerInvincible(PlayerId(),showDevHud)
-            notify('Developer mode '..(showDevHud and 'enabled' or 'disabled'))
-        end},
         {title='Max vehicle upgrades',onSelect=function() ExecuteCommand('maxmods') end},
         {title='Save vehicle (/admincar)',description='Add your current QBCore vehicle to player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
         {title='Teleport to waypoint',onSelect=waypoint},
@@ -139,20 +125,10 @@ local function open()
             local v=lib.inputDialog('Developer ped model',{{type='input',label='Model name',required=true}})
             if v then ExecuteCommand('setmodel '..v[1]) end
         end},
-        {title='Movement speed',onSelect=function()
-            local v=lib.inputDialog('Movement speed',{{type='select',label='Speed',options={{value='fast',label='Fast'},{value='normal',label='Normal'}},required=true}})
-            if v then ExecuteCommand('setspeed '..v[1]) end
-        end},
+
     }
     lib.registerContext({id='pm_devcoords_devadmin',title='PowerMoves Developer Tools',options=options})
     lib.showContext('pm_devcoords_devadmin')
 end
 RegisterNetEvent('pm-devcoords:devadmin:open',open)
 
--- Restore player state when this resource is stopped or restarted.
-AddEventHandler('onResourceStop', function(resource)
-    if resource ~= GetCurrentResourceName() then return end
-    if showDevHud then SetPlayerInvincible(PlayerId(), false) end
-    SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-    SetSwimMultiplierForPlayer(PlayerId(), 1.0)
-end)
