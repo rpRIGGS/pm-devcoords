@@ -76,8 +76,9 @@ local RayCastGamePlayCamera = function(distance)
         y = cameraCoord.y + direction.y * distance,
         z = cameraCoord.z + direction.z * distance
     }
-    local _, b, c, _, e = GetShapeTestResult(StartExpensiveSynchronousShapeTestLosProbe(cameraCoord.x, cameraCoord.y, cameraCoord.z, destination.x, destination.y, destination.z, -1, PlayerPedId(), 7))
-    return b, c, e
+    local handle = StartExpensiveSynchronousShapeTestLosProbe(cameraCoord.x, cameraCoord.y, cameraCoord.z, destination.x, destination.y, destination.z, -1, PlayerPedId(), 7)
+    local _, hit, coords, _, entity = GetShapeTestResult(handle)
+    return hit == 1, coords or vector3(destination.x,destination.y,destination.z), entity or 0
 end
 
 local DrawEntityBoundingBox = function(entity, color)
@@ -404,14 +405,14 @@ RunEntityViewThread = function()
                 local position = GetEntityCoords(playerPed)
                 local hit, coords, entity = RayCastGamePlayCamera(1000.0)
                 -- If entity is found then verify entity
-                if IsControlJustReleased(0, 74) then -- Copy Coords
+                if hit and IsControlJustReleased(0, 74) then -- Copy Coords
                     local x = PMRound(coords.x, 2)
                     local y = PMRound(coords.y, 2)
                     local z = PMRound(coords.z, 2)
                     lib.setClipboard(string.format('vector3(%s, %s, %s)', x, y, z))
                     PMNotify("Coordinates copied", 'success')
                 end
-                if hit and (IsEntityAVehicle(entity) or IsEntityAPed(entity) or IsEntityAnObject(entity)) then
+                if hit and entity ~= 0 and DoesEntityExist(entity) and (IsEntityAVehicle(entity) or IsEntityAPed(entity) or IsEntityAnObject(entity)) then
                     color = { r = 0, g = 255, b = 0, a = 200 }
                     FreeAimEntity = entity
                     DrawEntityBoundingBox(entity, color)
