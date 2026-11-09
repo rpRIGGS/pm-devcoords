@@ -3,14 +3,11 @@ local commands, events, sent, inserts = {}, {}, {}, {}
 source = 1
 exports = {['qb-core'] = {GetCoreObject = function()
     return {Functions = {
-        HasPermission = function(src) return src == 1 end,
+        HasPermission = function(src, role) assert(role == 'admin' or role == 'god'); return src == 1 end,
         GetPlayer = function(src) if src == 1 then return {PlayerData={license='license:test',citizenid='CID1'}} end end
     },Shared={Vehicles={adder={model='adder',hash=1234}}}}
 end}}
-IsPlayerAceAllowed = function(src, ace)
-    assert(ace == 'command.devcoords')
-    return src == 1
-end
+IsPlayerAceAllowed = function() error('Custom ACE must not be checked') end
 RegisterCommand = function(name, callback) commands[name]=callback end
 RegisterNetEvent = function(name, callback) events[name]=callback end
 TriggerClientEvent = function(name, target, ...)
