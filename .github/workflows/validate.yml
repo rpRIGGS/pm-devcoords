@@ -21,5 +21,7 @@ jobs:
         run: lua5.4 tests/client_spec.lua
       - name: Test developer ox_lib client menu and events
         run: lua5.4 tests/devadmin_client_spec.lua
+      - name: Test entity viewer native behavior
+        run: lua5.4 tests/entity_view_spec.lua
       - name: Test HTML overlay
         run: node tests/nui_spec.js
