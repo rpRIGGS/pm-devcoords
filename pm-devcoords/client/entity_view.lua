@@ -434,6 +434,9 @@ local function CopyFullEntity()
     PMNotify('Full entity information copied','success')
 end
 RegisterNetEvent('pm-devcoords:devadmin:copyEntity',CopyFullEntity)
+local function broadcastEntityStatus()
+    TriggerEvent('pm-devcoords:devadmin:entityStateChanged',{aim=EntityFreeAim,objects=EntityObjectView,vehicles=EntityVehicleView,peds=EntityPedView})
+end
 RegisterNetEvent('pm-devcoords:devadmin:entityview',function(action)
     if action=='aim' then ToggleEntityFreeView()
     elseif action=='objects' then ToggleEntityObjectView()
@@ -443,6 +446,7 @@ RegisterNetEvent('pm-devcoords:devadmin:entityview',function(action)
         local response=lib.inputDialog('Entity viewer distance',{{type='slider',label='Distance (meters)',min=5,max=50,step=5,default=EntityViewDistance}})
         if response and response[1] then SetEntityViewDistance(response[1]) end
     end
+    broadcastEntityStatus()
 end)
 
 -- Read-only status for ox_lib menu indicators.
