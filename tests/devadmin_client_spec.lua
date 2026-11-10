@@ -24,7 +24,12 @@ ToggleVehicleMod=function() end
 SetVehicleFixed=function() end
 TriggerServerEvent=function(name,props) assert(name=='pm-devcoords:collector:toggle' or (name=='pm-devcoords:devadmin:savecar' and props.plate=='DEV123')) end
 ExecuteCommand=function(cmd) commands[#commands+1]=cmd end
-TriggerEvent=function(name,action) events[name](action) end
+TriggerEvent=function(name,action)
+  if name=='pm-devcoords:devadmin:entityStatus' then return action({aim=false,objects=false,vehicles=false,peds=false}) end
+  if name=='pm-devcoords:devadmin:entityview' then return end
+  assert(events[name], 'missing event '..name)
+  events[name](action)
+end
 dofile('pm-devcoords/client/devadmin.lua')
 for _,name in ipairs({'copy','coords','admincar','maxmods','setmodel','open'}) do
   assert(events['pm-devcoords:devadmin:'..name], 'missing client event '..name)
@@ -54,6 +59,9 @@ local coords=options('pm_devcoords_coordinates',{'Coordinate collector','Copy ve
 options('pm_devcoords_entities',{'Free aim viewer (E/G/H)','Nearby objects','Nearby vehicles','Nearby peds','Viewer distance','Copy aimed entity information'})
 options('pm_devcoords_vehicles',{'Toggle vehicle developer HUD','Max vehicle upgrades','Save current vehicle (/admincar)'})
 local utilities=options('pm_devcoords_utilities',{'Teleport to waypoint','Set ped model'})
+assert(utilities['Teleport to waypoint'].description=='Must set a waypoint on the map first')
+assert(contexts.pm_devcoords_entities.options[1].iconColor=='red')
+assert(contexts.pm_devcoords_vehicles.options[1].iconColor=='red')
 coords['Coordinate collector'].onSelect()
 assert(commands[#commands]~='devcoordscollector')
 coords['Copy vector3'].onSelect()
