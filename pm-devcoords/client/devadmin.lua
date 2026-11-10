@@ -100,7 +100,53 @@ RegisterNetEvent('pm-devcoords:devadmin:setmodel',function(name)
     SetModelAsNoLongerNeeded(hash)
     notify('Ped model changed to '..name,'success')
 end)
-local function open()
+local open
+local function statusOption(title,enabled,action,description)
+    return {title=title,description=description,icon='circle',iconColor=enabled and 'green' or 'red',onSelect=action}
+end
+local function entityStates()
+    local state={}
+    TriggerEvent('pm-devcoords:devadmin:entityStatus',function(values) state=values end)
+    return state
+end
+local function openCoordinates()
+    lib.registerContext({id='pm_devcoords_coordinates',title='Coordinates',menu='pm_devcoords_devadmin',options={
+        {title='Coordinate collector',description='Pointer capture, groups, rows and text exports',onSelect=function() TriggerServerEvent('pm-devcoords:collector:toggle') end},
+        {title='Copy vector2',onSelect=function() ExecuteCommand('vector2') end},
+        {title='Copy vector3',onSelect=function() ExecuteCommand('vector3') end},
+        {title='Copy vector4',onSelect=function() ExecuteCommand('vector4') end},
+        {title='Copy heading',onSelect=function() ExecuteCommand('heading') end},
+        statusOption('Toggle live coordinates',showCoords,function() ExecuteCommand('coords'); openCoordinates() end),
+    }})
+    lib.showContext('pm_devcoords_coordinates')
+end
+RegisterNetEvent('pm-devcoords:devadmin:coordinates',openCoordinates)
+local openVehicles
+local function openEntities()
+    local state=entityStates()
+    local function toggle(which)
+        TriggerEvent('pm-devcoords:devadmin:entityview',which)
+        openEntities()
+    end
+    lib.registerContext({id='pm_devcoords_entities',title='Entities',menu='pm_devcoords_devadmin',options={
+        statusOption('Free aim viewer (E/G/H)',state.aim,function() toggle('aim') end),
+        statusOption('Nearby objects',state.objects,function() toggle('objects') end),
+        statusOption('Nearby vehicles',state.vehicles,function() toggle('vehicles') end),
+        statusOption('Nearby peds',state.peds,function() toggle('peds') end),
+        {title='Viewer distance',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','distance') end},
+        {title='Copy aimed entity information',description='Aim at an entity; free aim viewer is not required',onSelect=function() TriggerEvent('pm-devcoords:devadmin:copyEntity') end},
+    }})
+    lib.showContext('pm_devcoords_entities')
+end
+openVehicles = function()
+    lib.registerContext({id='pm_devcoords_vehicles',title='Vehicles',menu='pm_devcoords_devadmin',options={
+        statusOption('Toggle vehicle developer HUD',showVehicleInfo,function() showVehicleInfo=not showVehicleInfo; openVehicles() end),
+        {title='Max vehicle upgrades',onSelect=function() ExecuteCommand('maxmods') end},
+        {title='Save current vehicle (/admincar)',description='Add your vehicle to QBCore player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
+    }})
+    lib.showContext('pm_devcoords_vehicles')
+end
+open = function()
     local function register(id, title, options)
         lib.registerContext({id=id, title=title, menu='pm_devcoords_devadmin', options=options})
         lib.showContext(id)
@@ -109,36 +155,12 @@ local function open()
         id='pm_devcoords_devadmin',
         title='PM DevCoords — Developer Tools',
         options={
-            {title='Coordinates',description='Capture, copy and display coordinates',icon='crosshairs',onSelect=function()
-                register('pm_devcoords_coordinates','Coordinates',{
-                    {title='Coordinate collector',description='Pointer capture, groups, rows and text exports',onSelect=function() TriggerServerEvent('pm-devcoords:collector:toggle') end},
-                    {title='Copy vector2',onSelect=function() ExecuteCommand('vector2') end},
-                    {title='Copy vector3',onSelect=function() ExecuteCommand('vector3') end},
-                    {title='Copy vector4',onSelect=function() ExecuteCommand('vector4') end},
-                    {title='Copy heading',onSelect=function() ExecuteCommand('heading') end},
-                    {title='Toggle live coordinates',onSelect=function() ExecuteCommand('coords') end},
-                })
-            end},
-            {title='Entities',description='Inspect and manage aimed or nearby entities',icon='cube',onSelect=function()
-                register('pm_devcoords_entities','Entities',{
-                    {title='Free aim viewer (E/G/H)',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','aim') end},
-                    {title='Nearby objects',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','objects') end},
-                    {title='Nearby vehicles',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','vehicles') end},
-                    {title='Nearby peds',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','peds') end},
-                    {title='Viewer distance',onSelect=function() TriggerEvent('pm-devcoords:devadmin:entityview','distance') end},
-                    {title='Copy aimed entity information',onSelect=function() TriggerEvent('pm-devcoords:devadmin:copyEntity') end},
-                })
-            end},
-            {title='Vehicles',description='Vehicle data, upgrades and database saving',icon='car',onSelect=function()
-                register('pm_devcoords_vehicles','Vehicles',{
-                    {title='Toggle vehicle developer HUD',onSelect=function() showVehicleInfo=not showVehicleInfo end},
-                    {title='Max vehicle upgrades',onSelect=function() ExecuteCommand('maxmods') end},
-                    {title='Save current vehicle (/admincar)',description='Add your vehicle to QBCore player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
-                })
-            end},
+            {title='Coordinates',description='Capture, copy and display coordinates',icon='crosshairs',onSelect=openCoordinates},
+            {title='Entities',description='Inspect and manage aimed or nearby entities',icon='cube',onSelect=openEntities},
+            {title='Vehicles',description='Vehicle data, upgrades and database saving',icon='car',onSelect=function() openVehicles() end},
             {title='Utilities',description='Waypoint teleport and ped model tools',icon='wrench',onSelect=function()
                 register('pm_devcoords_utilities','Utilities',{
-                    {title='Teleport to waypoint',onSelect=waypoint},
+                    {title='Teleport to waypoint',description='Must set a waypoint on the map first',onSelect=waypoint},
                     {title='Set ped model',onSelect=function()
                         local v=lib.inputDialog('Developer ped model',{{type='input',label='Model name',required=true}})
                         if v then ExecuteCommand('setmodel '..v[1]) end
