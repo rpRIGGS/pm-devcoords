@@ -1,6 +1,10 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 local showCoords = false
 local showVehicleInfo = false
+local entityState = {aim=false,objects=false,vehicles=false,peds=false}
+RegisterNetEvent('pm-devcoords:devadmin:entityStateChanged',function(state)
+    if type(state)=='table' then entityState=state end
+end)
 local function drawLabel(x,y,value)
     SetTextFont(4); SetTextScale(0.35,0.35); SetTextColour(255,255,255,255)
     SetTextOutline(); SetTextEntry('STRING'); AddTextComponentString(value); DrawText(x,y)
@@ -102,12 +106,10 @@ RegisterNetEvent('pm-devcoords:devadmin:setmodel',function(name)
 end)
 local open
 local function statusOption(title,enabled,action,description)
-    return {title=title,description=description,icon='circle',iconColor=enabled and 'green' or 'red',onSelect=action}
+    return {title=title,description=description,icon='power-off',iconColor=enabled and 'green' or 'red',onSelect=action}
 end
 local function entityStates()
-    local state={}
-    TriggerEvent('pm-devcoords:devadmin:entityStatus',function(values) state=values end)
-    return state
+    return entityState
 end
 local function openCoordinates()
     lib.registerContext({id='pm_devcoords_coordinates',title='Coordinates',menu='pm_devcoords_devadmin',options={
@@ -116,7 +118,7 @@ local function openCoordinates()
         {title='Copy vector3',onSelect=function() ExecuteCommand('vector3') end},
         {title='Copy vector4',onSelect=function() ExecuteCommand('vector4') end},
         {title='Copy heading',onSelect=function() ExecuteCommand('heading') end},
-        statusOption('Toggle live coordinates',showCoords,function() ExecuteCommand('coords'); openCoordinates() end),
+        statusOption('Toggle live coordinates',showCoords,function() TriggerEvent('pm-devcoords:devadmin:coords'); openCoordinates() end),
     }})
     lib.showContext('pm_devcoords_coordinates')
 end
