@@ -42,8 +42,10 @@ local function capture(name)
     })
 end
 menu = function()
-    if not active then return notify('Start /devcoords first.','error') end
+    if not active then return notify('Start the coordinate collector from /devadmin first.','error') end
     local opts = {
+        {title='Back to Coordinates',icon='arrow-left',onSelect=function() TriggerEvent('pm-devcoords:devadmin:coordinates') end},
+        {title='Stop coordinate collector',icon='power-off',description='Turn off the pointer and overlay',onSelect=function() TriggerEvent('pm-devcoords:collector:stop') end},
         {title='New group / collection',onSelect=function()
             local input=lib.inputDialog('New collection',{
                 {type='input',label='Group',required=true,default=selectedGroup},
@@ -105,6 +107,10 @@ menu = function()
     lib.registerContext({id='pm_devcoords',title='PM DevCoords',options=opts})
     lib.showContext('pm_devcoords')
 end
+RegisterNetEvent('pm-devcoords:collector:stop',function()
+    if active then TriggerEvent('pm-devcoords:toggle') end
+    TriggerEvent('pm-devcoords:devadmin:coordinates')
+end)
 RegisterNetEvent('pm-devcoords:toggle',function()
     active=not active
     pointerGeneration = pointerGeneration + 1
