@@ -114,10 +114,10 @@ end
 local function openCoordinates()
     lib.registerContext({id='pm_devcoords_coordinates',title='Coordinates',menu='pm_devcoords_devadmin',options={
         {title='Coordinate collector',description='Pointer capture, groups, rows and text exports',onSelect=function() TriggerServerEvent('pm-devcoords:collector:toggle') end},
-        {title='Copy vector2',onSelect=function() ExecuteCommand('vector2') end},
-        {title='Copy vector3',onSelect=function() ExecuteCommand('vector3') end},
-        {title='Copy vector4',onSelect=function() ExecuteCommand('vector4') end},
-        {title='Copy heading',onSelect=function() ExecuteCommand('heading') end},
+        {title='Copy vector2',icon='crosshairs',onSelect=function() ExecuteCommand('vector2') end},
+        {title='Copy vector3',icon='crosshairs',onSelect=function() ExecuteCommand('vector3') end},
+        {title='Copy vector4',icon='crosshairs',onSelect=function() ExecuteCommand('vector4') end},
+        {title='Copy heading',icon='crosshairs',onSelect=function() ExecuteCommand('heading') end},
         statusOption('Toggle live coordinates',showCoords,function() TriggerEvent('pm-devcoords:devadmin:coords'); openCoordinates() end),
     }})
     lib.showContext('pm_devcoords_coordinates')
@@ -143,7 +143,7 @@ end
 openVehicles = function()
     lib.registerContext({id='pm_devcoords_vehicles',title='Vehicles',menu='pm_devcoords_devadmin',options={
         statusOption('Toggle vehicle developer HUD',showVehicleInfo,function() showVehicleInfo=not showVehicleInfo; openVehicles() end),
-        {title='Max vehicle upgrades',onSelect=function() ExecuteCommand('maxmods') end},
+        {title='Max vehicle upgrades',icon='wrench',onSelect=function() ExecuteCommand('maxmods') end},
         {title='Save current vehicle (/admincar)',description='Add your vehicle to QBCore player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
     }})
     lib.showContext('pm_devcoords_vehicles')
