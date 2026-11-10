@@ -112,6 +112,7 @@ local DrawEntityBoundingBox = function(entity, color)
 end
 
 local GetEntityInfo = function(entity)
+    if not entity or entity == 0 or not DoesEntityExist(entity) then return nil end
     local playerCoords = GetEntityCoords(PlayerPedId())
     local entityType   = GetEntityType(entity)
     local entityHash   = GetEntityModel(entity)
@@ -149,6 +150,7 @@ end
 
 local DrawEntityViewText = function(entity)
     local data            = GetEntityInfo(entity)
+    if not data then return end
     local count           = #data
 
     local posX            = FreeAimInfoBoxX
@@ -189,6 +191,7 @@ local DrawEntityViewTextInWorld = function(entity, coords)
     local onScreen, posX, posY = World3dToScreen2d(coords.x, coords.y, coords.z)
     if onScreen then
         local data        = GetEntityInfo(entity)
+        if not data then return end
         local count       = #data
         local textOffsetY = 0.015
         local leftPadding = 0.005
@@ -223,7 +226,7 @@ local GetVehicle = function(playerCoords)
     local success
     local rveh = nil
     repeat
-        if vehicle ~= FreeAimEntity then
+        if vehicle ~= FreeAimEntity and DoesEntityExist(vehicle) then
             local pos = GetEntityCoords(vehicle)
             local distance = #(playerCoords - pos)
             if distance < EntityViewDistance and distance > 5.0 then
@@ -245,7 +248,7 @@ local GetObject = function(playerCoords)
     local success
     local robject = nil
     repeat
-        if object ~= FreeAimEntity then
+        if object ~= FreeAimEntity and DoesEntityExist(object) then
             local pos = GetEntityCoords(object)
             local distance = #(playerCoords - pos)
             if distance < EntityViewDistance and distance > 5.0 then
@@ -267,7 +270,7 @@ local GetNPC = function(playerCoords)
     local success
     local rped = nil
     repeat
-        if ped ~= FreeAimEntity then
+        if ped ~= FreeAimEntity and DoesEntityExist(ped) then
             local pos = GetEntityCoords(ped)
             local distance = #(playerCoords - pos)
             if CanEntityBeUsed(ped) then
