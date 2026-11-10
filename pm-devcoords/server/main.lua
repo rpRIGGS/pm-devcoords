@@ -30,8 +30,47 @@ local function load()
     if ok and type(decoded) == 'table' then groups = decoded end
 end
 
+local function prettyJson(compact)
+    local result, depth, inString, escaped = {}, 0, false, false
+    local function newline()
+        result[#result + 1] = '\n' .. string.rep('    ', depth)
+    end
+    for i = 1, #compact do
+        local char = compact:sub(i, i)
+        if inString then
+            result[#result + 1] = char
+            if escaped then escaped = false
+            elseif char == '\\' then escaped = true
+            elseif char == '"' then inString = false end
+        elseif char == '"' then
+            inString = true
+            result[#result + 1] = char
+        elseif char == '{' or char == '[' then
+            result[#result + 1] = char
+            if compact:sub(i + 1, i + 1) ~= (char == '{' and '}' or ']') then
+                depth = depth + 1
+                newline()
+            end
+        elseif char == '}' or char == ']' then
+            if compact:sub(i - 1, i - 1) ~= (char == '}' and '{' or '[') then
+                depth = depth - 1
+                newline()
+            end
+            result[#result + 1] = char
+        elseif char == ',' then
+            result[#result + 1] = char
+            newline()
+        elseif char == ':' then
+            result[#result + 1] = ': '
+        else
+            result[#result + 1] = char
+        end
+    end
+    return table.concat(result) .. '\n'
+end
+
 local function persist()
-    return SaveResourceFile(resource, storage, json.encode(groups), -1)
+    return SaveResourceFile(resource, storage, prettyJson(json.encode(groups)), -1)
 end
 
 local function sortedKeys(tbl)
