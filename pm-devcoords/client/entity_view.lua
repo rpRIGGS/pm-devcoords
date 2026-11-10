@@ -162,7 +162,7 @@ local DrawEntityViewText = function(entity)
     local heightOfContent = (((count) * textSpacing) + titleSpacing) / count
     local rectHeight      = ((count - 1) * heightOfContent) + paddingTop
 
-    DrawRect(posX + (rectWidth / 2), posY + ((rectHeight / 2) - posY / 2), rectWidth, rectHeight, 11, 11, 11, 200)
+    DrawRect(posX + (rectWidth / 2), posY + ((rectHeight / 2) - posY / 2), rectWidth, rectHeight, 40, 44, 53, 215)
 
     for k, v in ipairs(data) do
         SetTextScale(0.35, 0.35)
@@ -198,7 +198,7 @@ local DrawEntityViewTextInWorld = function(entity, coords)
         local rectWidth   = 0.12
         local rectHeight  = ((count) * offSetCount) + botPadding
 
-        DrawRect(posX, posY, rectWidth, rectHeight, 11, 11, 11, 200)
+        DrawRect(posX, posY, rectWidth, rectHeight, 40, 44, 53, 215)
 
         for k, v in ipairs(data) do
             if k ~= 1 and k ~= 2 then
@@ -440,4 +440,9 @@ RegisterNetEvent('pm-devcoords:devadmin:entityview',function(action)
         local response=lib.inputDialog('Entity viewer distance',{{type='slider',label='Distance (meters)',min=5,max=50,step=5,default=EntityViewDistance}})
         if response and response[1] then SetEntityViewDistance(response[1]) end
     end
+end)
+
+-- Read-only status for ox_lib menu indicators.
+RegisterNetEvent('pm-devcoords:devadmin:entityStatus',function(reply)
+    if type(reply)=='function' then reply({aim=EntityFreeAim,objects=EntityObjectView,vehicles=EntityVehicleView,peds=EntityPedView}) end
 end)
