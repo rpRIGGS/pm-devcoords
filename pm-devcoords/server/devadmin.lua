@@ -111,12 +111,6 @@ RegisterCommand('setammo',function(src,args)
     TriggerClientEvent('pm-devcoords:devadmin:requestAmmo',src,amount)
 end,false)
 
-for command,event in pairs({fix='repairVehicle',dv='deleteVehicle'}) do
-    RegisterCommand(command,function(src)
-        if not permitted(src) then return tell(src,'Developer permission required.','error') end
-        TriggerClientEvent('pm-devcoords:devadmin:'..event,src)
-    end,false)
-end
 RegisterCommand('setspeed',function(src,args)
     if not permitted(src) then return tell(src,'Developer permission required.','error') end
     local value=tonumber(args[1])
