@@ -130,30 +130,6 @@ local function setAmmo()
     TriggerServerEvent('pm-devcoords:devadmin:setAmmo',weapon,amount)
 end
 
-local function repairVehicle()
-    local ped=PlayerPedId()
-    local vehicle=GetVehiclePedIsIn(ped,false)
-    if vehicle==0 or GetPedInVehicleSeat(vehicle,-1)~=ped then return notify('Drive a vehicle first.','error') end
-    SetVehicleFixed(vehicle)
-    SetVehicleDeformationFixed(vehicle)
-    SetVehicleDirtLevel(vehicle,0.0)
-    notify('Vehicle repaired.','success')
-end
-local function deleteVehicle()
-    local ped=PlayerPedId()
-    local vehicle=GetVehiclePedIsIn(ped,false)
-    if vehicle==0 then vehicle=GetClosestVehicle(GetEntityCoords(ped),5.0,0,70) end
-    if vehicle==0 or not DoesEntityExist(vehicle) then return notify('No vehicle within range.','error') end
-    if NetworkGetEntityIsNetworked(vehicle) and not NetworkHasControlOfEntity(vehicle) then
-        NetworkRequestControlOfEntity(vehicle)
-        return notify('Requesting vehicle control; retry.','error')
-    end
-    SetEntityAsMissionEntity(vehicle,true,true)
-    DeleteVehicle(vehicle)
-    notify(DoesEntityExist(vehicle) and 'Vehicle could not be deleted.' or 'Vehicle deleted.',DoesEntityExist(vehicle) and 'error' or 'success')
-end
-RegisterNetEvent('pm-devcoords:devadmin:repairVehicle',repairVehicle)
-RegisterNetEvent('pm-devcoords:devadmin:deleteVehicle',deleteVehicle)
 RegisterNetEvent('pm-devcoords:devadmin:setSpeed',function(speed)
     local ped=PlayerPedId()
     SetRunSprintMultiplierForPlayer(PlayerId(),speed)
@@ -204,8 +180,6 @@ openVehicles = function()
     lib.registerContext({id='pm_devcoords_vehicles',title='Vehicles',menu='pm_devcoords_devadmin',options={
         statusOption('Toggle vehicle developer HUD',showVehicleInfo,function() showVehicleInfo=not showVehicleInfo; openVehicles() end),
         {title='Max vehicle upgrades',icon='wrench',onSelect=function() ExecuteCommand('maxmods') end},
-        {title='Repair current vehicle (/fix)',icon='wrench',onSelect=function() ExecuteCommand('fix') end},
-        {title='Delete current/nearby vehicle (/dv)',icon='trash',onSelect=function() ExecuteCommand('dv') end},
         {title='Save current vehicle (/admincar)',description='Add your vehicle to QBCore player_vehicles',onSelect=function() ExecuteCommand('admincar') end},
     }})
     lib.showContext('pm_devcoords_vehicles')
