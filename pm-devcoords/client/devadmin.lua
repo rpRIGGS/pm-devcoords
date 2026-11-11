@@ -104,6 +104,26 @@ RegisterNetEvent('pm-devcoords:devadmin:setmodel',function(name)
     SetModelAsNoLongerNeeded(hash)
     notify('Ped model changed to '..name,'success')
 end)
+RegisterNetEvent('pm-devcoords:devadmin:applyAmmo',function(weaponHash,amount)
+    local ped=PlayerPedId()
+    if type(amount)~='number' or amount<0 or amount>9999 then return end
+    if GetSelectedPedWeapon(ped)~=weaponHash or weaponHash==joaat('WEAPON_UNARMED') then
+        return notify('Keep the selected weapon equipped while setting ammo.','error')
+    end
+    SetPedAmmo(ped,weaponHash,amount)
+    notify(('Weapon ammo set to %d.'):format(amount),'success')
+end)
+local function setAmmo()
+    local ped=PlayerPedId()
+    local weapon=GetSelectedPedWeapon(ped)
+    if weapon==joaat('WEAPON_UNARMED') then return notify('Equip a weapon first.','error') end
+    local current=GetAmmoInPedWeapon(ped,weapon)
+    local result=lib.inputDialog('Set Weapon Ammo',{{type='number',label='Total ammunition',description='For your currently equipped weapon',default=current,min=0,max=9999,required=true}})
+    if not result then return end
+    local amount=tonumber(result[1])
+    if not amount or amount%1~=0 or amount<0 or amount>9999 then return notify('Enter a whole number between 0 and 9999.','error') end
+    TriggerServerEvent('pm-devcoords:devadmin:setAmmo',weapon,amount)
+end
 local open
 local function statusOption(title,enabled,action,description)
     return {title=title,description=description,icon='power-off',iconColor=enabled and 'green' or 'red',onSelect=action}
@@ -160,6 +180,9 @@ open = function()
             {title='Coordinates',description='Capture, copy and display coordinates',icon='crosshairs',onSelect=openCoordinates},
             {title='Entities',description='Inspect and manage aimed or nearby entities',icon='cube',onSelect=openEntities},
             {title='Vehicles',description='Vehicle data, upgrades and database saving',icon='car',onSelect=function() openVehicles() end},
+            {title='Weapons',description='Set ammunition for your equipped weapon',icon='crosshair',onSelect=function()
+                register('pm_devcoords_weapons','Weapons',{{title='Set Ammo',icon='crosshair',onSelect=setAmmo}})
+            end},
             {title='Utilities',description='Waypoint teleport and ped model tools',icon='wrench',onSelect=function()
                 register('pm_devcoords_utilities','Utilities',{
                     {title='Teleport to waypoint',description='Must set a waypoint on the map first',onSelect=waypoint},
