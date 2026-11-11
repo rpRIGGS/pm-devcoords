@@ -77,3 +77,26 @@ RegisterCommand('setmodel', function(src,args)
     if not QBCore.Functions.GetPlayer(target) then return tell(src,'Player not online.','error') end
     TriggerClientEvent('pm-devcoords:devadmin:setmodel',target,model)
 end,false)
+
+-- QBCore weapon ammo is also stored in the weapon item's info.ammo.
+RegisterNetEvent('pm-devcoords:devadmin:setAmmo',function(weaponHash,amount)
+    local src=source
+    if not permitted(src) then return end
+    if type(weaponHash)~='number' or type(amount)~='number' or amount%1~=0 or amount<0 or amount>9999 then return end
+    local player=QBCore.Functions.GetPlayer(src)
+    if not player then return end
+    local items=player.PlayerData.items or {}
+    local matched=false
+    for slot,item in pairs(items) do
+        if item and type(item.name)=='string' and item.name:sub(1,7)=='weapon_' and GetHashKey(item.name)==weaponHash then
+            item.info=type(item.info)=='table' and item.info or {}
+            item.info.ammo=amount
+            items[slot]=item
+            matched=true
+            break
+        end
+    end
+    if not matched then return tell(src,'Equipped weapon not found in QBCore inventory.','error') end
+    player.Functions.SetInventory(items)
+    TriggerClientEvent('pm-devcoords:devadmin:applyAmmo',src,weaponHash,amount)
+end)
