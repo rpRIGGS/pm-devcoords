@@ -107,8 +107,8 @@ end)
 RegisterNetEvent('pm-devcoords:devadmin:applyAmmo',function(weaponHash,amount)
     local ped=PlayerPedId()
     if type(amount)~='number' or amount<0 or amount>9999 then return end
-    if GetSelectedPedWeapon(ped)~=weaponHash or weaponHash==joaat('WEAPON_UNARMED') then
-        return notify('Keep the selected weapon equipped while setting ammo.','error')
+    if weaponHash==joaat('WEAPON_UNARMED') or not HasPedGotWeapon(ped,weaponHash,false) then
+        return notify('Weapon is not equipped or owned.','error')
     end
     SetPedAmmo(ped,weaponHash,amount)
     notify(('Weapon ammo set to %d.'):format(amount),'success')
