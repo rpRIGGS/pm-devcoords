@@ -164,9 +164,3 @@ RegisterCommand('givenuifocus',function(src,args)
     TriggerClientEvent('pm-devcoords:devadmin:giveNuiFocus',target,focus,cursor)
 end,false)
 
-RegisterCommand('devcar',function(src,args)
-    if not permitted(src) then return tell(src,'Developer permission required.','error') end
-    local model=args[1]
-    if not model or #model>64 or not model:match('^[%w_]+$') then return tell(src,'Usage: /devcar [vehicle model]','error') end
-    TriggerClientEvent('pm-devcoords:devadmin:spawnVehicle',src,model)
-end,false)
