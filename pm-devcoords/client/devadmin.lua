@@ -45,57 +45,6 @@ RegisterNetEvent('pm-devcoords:devadmin:admincar', function()
     end
     TriggerServerEvent('pm-devcoords:devadmin:savecar', QBCore.Functions.GetVehicleProperties(car))
 end)
-RegisterNetEvent('pm-devcoords:devadmin:spawnVehicle',function(model)
-    if type(model)~='string' or #model>64 or not model:match('^[%w_]+
-    local car = GetVehiclePedIsIn(PlayerPedId(), false)
-    if car == 0 then return notify('Enter a vehicle to apply max performance upgrades.', 'error') end
-    if GetPedInVehicleSeat(car, -1) ~= PlayerPedId() then return notify('You must be the driver.', 'error') end
-    SetVehicleModKit(car, 0)
-    -- Original qb-adminmenu performance upgrade slots (not every cosmetic mod).
-    for _, slot in ipairs({11, 12, 13, 15, 16}) do
-        local highest = GetNumVehicleMods(car, slot) - 1
-        if highest >= 0 then SetVehicleMod(car, slot, highest, false) end
-    end
-    ToggleVehicleMod(car, 18, true)
-    SetVehicleFixed(car)
-    notify('Maximum performance upgrades applied.', 'success')
-end
-RegisterNetEvent('pm-devcoords:devadmin:maxmods', maxVehicle)
-local function waypoint()
-    local blip=GetFirstBlipInfoId(8)
-    if not DoesBlipExist(blip) then return notify('Set a waypoint first.','error') end
-    local c=GetBlipInfoIdCoord(blip)
-    local ped=PlayerPedId()
-    local entity=GetVehiclePedIsIn(ped,false)
-    if entity==0 then entity=ped end
-    for height=1,1000,50 do
-        SetEntityCoordsNoOffset(entity,c.x,c.y,height+0.0,false,false,false)
-        Wait(0)
-        local found,z=GetGroundZFor_3dCoord(c.x,c.y,height+0.0,false)
-        if found then
-            SetEntityCoordsNoOffset(entity,c.x,c.y,z+1.0,false,false,false)
-            notify('Teleported to waypoint.','success')
-            return
-        end
-    end
-    SetEntityCoordsNoOffset(entity,c.x,c.y,1000.0,false,false,false)
-    notify('Ground height unavailable; teleported above waypoint.','error')
-end
-CreateThread(function()
-    while true do
-        if showVehicleInfo then
-                local car=GetVehiclePedIsIn(PlayerPedId(),false)
-                if car~=0 and DoesEntityExist(car) and IsEntityAVehicle(car) then
-                    local hash=GetEntityModel(car)
-                    drawLabel(0.4,0.888,'Vehicle Developer Data')
-                    drawLabel(0.4,0.913,('Entity: %s | Network: %s'):format(car,NetworkGetEntityIsNetworked(car) and NetworkGetNetworkIdFromEntity(car) or 'not networked'))
-                    drawLabel(0.4,0.938,('Model: %s | Hash: %s'):format(GetLabelText(GetDisplayNameFromVehicleModel(hash)),hash))
-                    drawLabel(0.4,0.963,('Engine: %.2f | Body: %.2f'):format(GetVehicleEngineHealth(car),GetVehicleBodyHealth(car)))
-                end
-            Wait(0)
-        else Wait(300) end
-    end
-end)
 
 RegisterNetEvent('pm-devcoords:devadmin:setmodel',function(name)
     local hash=joaat(name)
