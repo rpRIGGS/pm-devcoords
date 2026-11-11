@@ -173,21 +173,6 @@ open = function()
 end
 RegisterNetEvent('pm-devcoords:devadmin:open',open)
 
-) then return notify('Invalid vehicle model.','error') end
-    local hash=joaat(model)
-    if not IsModelInCdimage(hash) or not IsModelAVehicle(hash) then return notify('Vehicle model not found.','error') end
-    local ped=PlayerPedId()
-    local c=GetEntityCoords(ped)
-    local heading=GetEntityHeading(ped)
-    lib.requestModel(hash)
-    local vehicle=CreateVehicle(hash,c.x+2.0,c.y+2.0,c.z,heading,true,false)
-    SetModelAsNoLongerNeeded(hash)
-    if vehicle==0 or not DoesEntityExist(vehicle) then return notify('Vehicle spawn failed.','error') end
-    SetVehicleOnGroundProperly(vehicle)
-    SetPedIntoVehicle(ped,vehicle,-1)
-    SetEntityAsMissionEntity(vehicle,true,true)
-    notify('Developer vehicle spawned: '..model,'success')
-end)
 local function maxVehicle()
     local car = GetVehiclePedIsIn(PlayerPedId(), false)
     if car == 0 then return notify('Enter a vehicle to apply max performance upgrades.', 'error') end
