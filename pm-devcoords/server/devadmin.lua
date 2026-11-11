@@ -105,9 +105,17 @@ end)
 RegisterCommand('setammo',function(src,args)
     if not permitted(src) then return tell(src,'Developer permission required.','error') end
     local amount=tonumber(args[1])
-    if not amount or amount%1~=0 or amount>9999 or amount<0 then return tell(src,'Usage: /setammo [0-9999]','error') end
+    if not amount or amount%1~=0 or amount<0 or amount>9999 then
+        return tell(src,'Usage: /setammo [0-9999] [optional weapon]','error')
+    end
     local weapon=args[2]
-    if weapon and not weapon:upper():match('^WEAPON_[%w_]+
+    if weapon then
+        weapon=weapon:upper()
+        if not weapon:match('^WEAPON_[%w_]+$') then weapon='WEAPON_'..weapon end
+        if not weapon:match('^WEAPON_[%w_]+$') then return tell(src,'Invalid weapon name.','error') end
+    end
+    TriggerClientEvent('pm-devcoords:devadmin:requestAmmo',src,amount,weapon)
+end,false)
 
 RegisterCommand('setspeed',function(src,args)
     if not permitted(src) then return tell(src,'Developer permission required.','error') end
