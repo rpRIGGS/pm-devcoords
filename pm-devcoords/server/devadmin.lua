@@ -101,89 +101,36 @@ RegisterNetEvent('pm-devcoords:devadmin:setAmmo',function(weaponHash,amount)
     TriggerClientEvent('pm-devcoords:devadmin:applyAmmo',src,weaponHash,amount)
 end)
 
--- Preserve qb-adminmenu's /setammo [amount] developer command.
+-- Developer ammo and utility commands.
 RegisterCommand('setammo',function(src,args)
     if not permitted(src) then return tell(src,'Developer permission required.','error') end
     local amount=tonumber(args[1])
-    if not amount or amount%1~=0 or amount<0 or amount>9999 then
-        return tell(src,'Usage: /setammo [0-9999]','error')
-    end
-    local weapon=args[2]
-    if weapon and weapon~='' then
-        weapon=weapon:upper()
-        if not weapon:match('^WEAPON_[A-Z0-9_]+
+    if not amount or amount%1~=0 or amount>9999 or amount<0 then return tell(src,'Usage: /setammo [0-9999]','error') end
+    TriggerClientEvent('pm-devcoords:devadmin:requestAmmo',src,amount)
 end,false)
 
 RegisterCommand('setspeed',function(src,args)
     if not permitted(src) then return tell(src,'Developer permission required.','error') end
-    local speed=(args[1] or ''):lower()
+    local speed=(args[1] or 'normal'):lower()
     local value
-    if speed=='' or speed=='normal' then value=1.0
+    if speed=='normal' then value=1.0
     elseif speed=='fast' then value=1.49
-    else
-        value=tonumber(speed)
-        if not value or value<1.0 or value>1.49 then return tell(src,'Usage: /setspeed [fast|normal|1.0-1.49]','error') end
-    end
+    else value=tonumber(speed) end
+    if not value or value<1.0 or value>1.49 then return tell(src,'Usage: /setspeed [fast|normal|1.0-1.49]','error') end
     TriggerClientEvent('pm-devcoords:devadmin:setSpeed',src,value)
-end,false)
-RegisterCommand('givenuifocus',function(src,args)
-    if not permitted(src) then return tell(src,'Developer permission required.','error') end
-    local target,focus,cursor
-    if tonumber(args[1]) then
-        target=tonumber(args[1])
-        focus=(args[2] or ''):lower()
-        cursor=(args[3] or ''):lower()
-    else
-        target=src
-        focus=(args[1] or ''):lower()
-        cursor=focus
-    end
-    if not QBCore.Functions.GetPlayer(target) then return tell(src,'Player not online.','error') end
-    local function parse(v)
-        if v=='true' or v=='on' or v=='1' then return true end
-        if v=='false' or v=='off' or v=='0' then return false end
-        return nil
-    end
-    local f,c=parse(focus),parse(cursor)
-    if f==nil or c==nil then return tell(src,'Usage: /givenuifocus [id] [true/false] [true/false] or /givenuifocus on/off','error') end
-    TriggerClientEvent('pm-devcoords:devadmin:giveNuiFocus',target,f,c)
-end,false)
-) then weapon='WEAPON_'..weapon end
-    end
-    TriggerClientEvent('pm-devcoords:devadmin:requestAmmo',src,amount,weapon)
 end,false)
 
-RegisterCommand('setspeed',function(src,args)
-    if not permitted(src) then return tell(src,'Developer permission required.','error') end
-    local speed=(args[1] or ''):lower()
-    local value
-    if speed=='' or speed=='normal' then value=1.0
-    elseif speed=='fast' then value=1.49
-    else
-        value=tonumber(speed)
-        if not value or value<1.0 or value>1.49 then return tell(src,'Usage: /setspeed [fast|normal|1.0-1.49]','error') end
-    end
-    TriggerClientEvent('pm-devcoords:devadmin:setSpeed',src,value)
-end,false)
 RegisterCommand('givenuifocus',function(src,args)
     if not permitted(src) then return tell(src,'Developer permission required.','error') end
-    local target,focus,cursor
-    if tonumber(args[1]) then
-        target=tonumber(args[1])
-        focus=(args[2] or ''):lower()
-        cursor=(args[3] or ''):lower()
-    else
-        target=src
-        focus=(args[1] or ''):lower()
-        cursor=focus
-    end
-    if not QBCore.Functions.GetPlayer(target) then return tell(src,'Player not online.','error') end
+    local target=tonumber(args[1]) or src
+    local offset=tonumber(args[1]) and 2 or 1
     local function parse(v)
-        if v=='true' or v=='on' or v=='1' then return true end
-        if v=='false' or v=='off' or v=='0' then return false end
-        return nil
+        if v=='on' or v=='true' or v=='1' then return true end
+        if v=='off' or v=='false' or v=='0' then return false end
     end
-    local f,c=parse(focus),parse(cursor)
-    if f==nil or c==nil then return tell(src,'Usage: /givenuifocus [id] [true/false] [true/false] or /givenuifocus on/off','error') end
-    TriggerClientEvent('pm-devcoords:devadmin:giveNuiFocus',target,f,c)
+    local focus=parse((args[offset] or ''):lower())
+    local cursor=parse((args[offset+1] or args[offset] or ''):lower())
+    if focus==nil or cursor==nil then return tell(src,'Usage: /givenuifocus [id] [true/false] [true/false]','error') end
+    if not QBCore.Functions.GetPlayer(target) then return tell(src,'Player not online.','error') end
+    TriggerClientEvent('pm-devcoords:devadmin:giveNuiFocus',target,focus,cursor)
 end,false)
