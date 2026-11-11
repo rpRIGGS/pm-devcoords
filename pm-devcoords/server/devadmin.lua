@@ -100,3 +100,13 @@ RegisterNetEvent('pm-devcoords:devadmin:setAmmo',function(weaponHash,amount)
     player.Functions.SetInventory(items)
     TriggerClientEvent('pm-devcoords:devadmin:applyAmmo',src,weaponHash,amount)
 end)
+
+-- Preserve qb-adminmenu's /setammo [amount] developer command.
+RegisterCommand('setammo',function(src,args)
+    if not permitted(src) then return tell(src,'Developer permission required.','error') end
+    local amount=tonumber(args[1])
+    if not amount or amount%1~=0 or amount<0 or amount>9999 then
+        return tell(src,'Usage: /setammo [0-9999]','error')
+    end
+    TriggerClientEvent('pm-devcoords:devadmin:requestAmmo',src,amount)
+end,false)
