@@ -141,49 +141,6 @@ CreateThread(function()
     end
 end)
 
-RegisterNetEvent('pm-devcoords:devadmin:setmodel',function(name)
-    local hash=joaat(name)
-    if not IsModelInCdimage(hash) or not IsModelValid(hash) or not IsModelAPed(hash) then return notify('Invalid ped model.','error') end
-    lib.requestModel(hash)
-    SetPlayerModel(PlayerId(),hash)
-    SetModelAsNoLongerNeeded(hash)
-    notify('Ped model changed to '..name,'success')
-end)
-RegisterNetEvent('pm-devcoords:devadmin:applyAmmo',function(weaponHash,amount)
-    local ped=PlayerPedId()
-    if type(amount)~='number' or amount<0 or amount>9999 then return end
-    if weaponHash==joaat('WEAPON_UNARMED') or not HasPedGotWeapon(ped,weaponHash,false) then
-        return notify('Weapon is not equipped or owned.','error')
-    end
-    SetPedAmmo(ped,weaponHash,amount)
-    notify(('Weapon ammo set to %d.'):format(amount),'success')
-end)
-RegisterNetEvent('pm-devcoords:devadmin:requestAmmo',function(amount,weaponName)
-    local weapon=weaponName and joaat(weaponName:upper()) or GetSelectedPedWeapon(PlayerPedId())
-    if weapon==joaat('WEAPON_UNARMED') then return notify('Equip a weapon first.','error') end
-    TriggerServerEvent('pm-devcoords:devadmin:setAmmo',weapon,amount)
-end)
-local function setAmmo()
-    local ped=PlayerPedId()
-    local weapon=GetSelectedPedWeapon(ped)
-    if weapon==joaat('WEAPON_UNARMED') then return notify('Equip a weapon first.','error') end
-    local current=GetAmmoInPedWeapon(ped,weapon)
-    local result=lib.inputDialog('Set Weapon Ammo',{{type='number',label='Total ammunition',description='For your currently equipped weapon',default=current,min=0,max=9999,required=true}})
-    if not result then return end
-    local amount=tonumber(result[1])
-    if not amount or amount%1~=0 or amount<0 or amount>9999 then return notify('Enter a whole number between 0 and 9999.','error') end
-    TriggerServerEvent('pm-devcoords:devadmin:setAmmo',weapon,amount)
-end
-
-RegisterNetEvent('pm-devcoords:devadmin:setSpeed',function(speed)
-    local ped=PlayerPedId()
-    SetRunSprintMultiplierForPlayer(PlayerId(),speed)
-    notify(('Run speed multiplier: %.2f'):format(speed),'success')
-end)
-RegisterNetEvent('pm-devcoords:devadmin:giveNuiFocus',function(state,cursor)
-    SetNuiFocus(state,cursor)
-    notify(state and 'NUI focus enabled. Use /givenuifocus off to release.' or 'NUI focus released.','inform')
-end)
 
 local open
 local function statusOption(title,enabled,action,description)
@@ -241,8 +198,8 @@ open = function()
             {title='Coordinates',description='Capture, copy and display coordinates',icon='crosshairs',onSelect=openCoordinates},
             {title='Entities',description='Inspect and manage aimed or nearby entities',icon='cube',onSelect=openEntities},
             {title='Vehicles',description='Vehicle data, upgrades and database saving',icon='car',onSelect=function() openVehicles() end},
-            {title='Weapons',description='Set ammunition for your equipped weapon',icon='crosshair',onSelect=function()
-                register('pm_devcoords_weapons','Weapons',{{title='Set Ammo',icon='crosshair',onSelect=setAmmo}})
+            {title='Weapons',description='Set ammunition for your equipped weapon',icon='gun',onSelect=function()
+                register('pm_devcoords_weapons','Weapons',{{title='Set Ammo',icon='gun',onSelect=setAmmo}})
             end},
             {title='Utilities',description='Waypoint teleport and ped model tools',icon='wrench',onSelect=function()
                 register('pm_devcoords_utilities','Utilities',{
