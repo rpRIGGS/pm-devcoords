@@ -4,8 +4,6 @@ on:
     paths:
       - 'pm-devcoords/**'
       - 'tests/**'
-      - '.github/workflows/validate.yml'
-      - 'README.md'
   pull_request:
     paths:
       - 'pm-devcoords/**'
