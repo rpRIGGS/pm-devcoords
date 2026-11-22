@@ -1,8 +1,23 @@
 name: PM DevCoords validation
 on:
   push:
+    paths:
+      - 'pm-devcoords/**'
+      - 'tests/**'
+      - '.github/workflows/validate.yml'
+      - 'README.md'
   pull_request:
+    paths:
+      - 'pm-devcoords/**'
+      - 'tests/**'
+      - '.github/workflows/validate.yml'
+      - 'README.md'
   workflow_dispatch:
+
+concurrency:
+  group: pm-devcoords-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
