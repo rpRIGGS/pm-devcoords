@@ -62,3 +62,8 @@ Use **/devadmin** to open the unified ox_lib developer menu. Selected qb-adminme
 **Permissions:** All PM DevCoords features use QBCore's existing `admin` or `god` permission checks. No custom `command.devcoords` ACE grant is needed.
 
 **Validation:** GitHub Actions checks Lua syntax and the repository's automated tests. Live FiveM verification remains required for client natives, entity controls, clipboard, /admincar database writes, and coexistence with Legend/txAdmin. A passing CI run is not a claim of successful in-game testing.
+
+
+## GitHub Actions usage
+
+Validation runs only for changes to the resource, tests, this workflow, or README. A newer push or pull request on the same ref cancels superseded validation. This workflow uploads no artifacts; dispatch it manually only when a targeted validation run is needed.
